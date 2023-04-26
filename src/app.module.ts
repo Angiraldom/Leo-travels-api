@@ -6,6 +6,7 @@ import configuration from './config';
 import { enviroments } from './enviroments';
 
 import { ConfigModule } from '@nestjs/config';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { ConfigModule } from '@nestjs/config';
       load: [configuration],
       isGlobal: true,
     }),
-    DatabaseModule],
+    DatabaseModule,
+    PaymentsModule],
   controllers: [AppController],
   providers: [AppService],
 })
