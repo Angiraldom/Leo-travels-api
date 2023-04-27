@@ -13,6 +13,7 @@ import {
   buildResponseSuccess,
 } from '../../../shared/utils/utilities/Response.util';
 import { encrypt } from '../../../shared/function/encryptPassword.function';
+import { REQUIRED_PROPERTIES } from '../constant/fieldsValidation.constant';
 
 @Injectable()
 export class UserService {
@@ -84,6 +85,15 @@ export class UserService {
   async updateUser(userToUpdate: UpdateUserDto): Promise<IRequestResponse> {
     let response: IRequestResponse;
     try {
+      //Check if userToUpdate has at least one "required" properties.
+      await validateAction(
+        false,
+        Object.keys(userToUpdate).some((property) =>
+          REQUIRED_PROPERTIES.has(property),
+        ),
+        'Verify the information provided. The values are not valid.',
+      );
+
       //validate user by _id.
       const EXIST_USER = await this.findUser({
         _id: userToUpdate._id,

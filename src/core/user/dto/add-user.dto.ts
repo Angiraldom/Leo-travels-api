@@ -6,6 +6,7 @@ import {
   IsIn,
   IsBoolean,
 } from 'class-validator';
+
 import { ROLES, TYPE_DOCUMENT } from '../constant/fieldsValidation.constant';
 
 export class AddUserDto {
