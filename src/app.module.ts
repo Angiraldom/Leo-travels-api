@@ -7,6 +7,7 @@ import { enviroments } from './enviroments';
 
 import { ConfigModule } from '@nestjs/config';
 import { CoreModule } from './core/core.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -16,8 +17,10 @@ import { CoreModule } from './core/core.module';
       isGlobal: true,
     }),
     DatabaseModule,
-    CoreModule],
+    CoreModule,
+    SharedModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
