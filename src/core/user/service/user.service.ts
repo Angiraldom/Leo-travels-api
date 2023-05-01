@@ -50,13 +50,16 @@ export class UserService {
     let response: IRequestResponse;
     try {
       //Validate user by identification.
-      const EXIST_USER = await this.findUser({
-        numberDocument: user.numberDocument,
-      });
+      const EXIST_USER = await this.findUser(
+        {
+          numberDocument: user.numberDocument,
+        },
+        { _id: 1 },
+      );
 
       await validateAction(
         true,
-        EXIST_USER?._id,
+        EXIST_USER !== null,
         'The user is already registered.',
       );
 
@@ -95,9 +98,12 @@ export class UserService {
       );
 
       //validate user by _id.
-      const EXIST_USER = await this.findUser({
-        _id: userToUpdate._id,
-      });
+      const EXIST_USER = await this.findUser(
+        {
+          _id: userToUpdate._id,
+        },
+        { _id: 1 },
+      );
 
       await validateAction(
         true,
@@ -133,9 +139,12 @@ export class UserService {
       const { _id } = userToDelete;
 
       //validate user by _id.
-      const EXIST_USER = await this.findUser({
-        _id,
-      });
+      const EXIST_USER = await this.findUser(
+        {
+          _id,
+        },
+        { _id: 1 },
+      );
 
       await validateAction(
         true,
@@ -161,11 +170,21 @@ export class UserService {
   /**
    * Function generic to verify that the user is not registered.
    * @param {any} objSearch - Objection to search.
-   * @returns {Promise<{_id}>} - A _id if the user exists.
+   * @param {any} objFilter - Objection to filter.
+   * @returns {Promise<{_id: string; email: string; password: string; rol: string }>} - A _id if the user exists.
    */
-  private async findUser(objSearch: any): Promise<{ _id }> {
+  async findUser(
+    objSearch: any,
+    objFilter: any,
+  ): Promise<{
+    _id: string;
+    email: string;
+    password: string;
+    rol: string;
+    status: boolean;
+  }> {
     try {
-      return this.userModel.findOne(objSearch, { _id: 1 });
+      return this.userModel.findOne(objSearch, objFilter);
     } catch (error) {
       throw new HttpException(
         'An error has occurred when looking for the user.',
