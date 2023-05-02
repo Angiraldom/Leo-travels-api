@@ -92,7 +92,7 @@ export class AuthService {
       );
 
       // Calculate 24 hours from the expiration of the token received.
-      const EXPIRATION_IN_TIMESTAMP = OLD_TOKEN.exp + 24 * 60 * 60 * 1000;
+      const EXPIRATION_IN_TIMESTAMP = OLD_TOKEN.exp + 6 * 60 * 60 * 1000;
 
       // Delete expiration token old to avoid mistakes.
       delete OLD_TOKEN.exp;

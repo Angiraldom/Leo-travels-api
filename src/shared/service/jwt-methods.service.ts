@@ -14,7 +14,7 @@ export class JwtMethodsService {
   buildJwtToken(payload: IJwtPayload): string {
     return this.jwtService.sign(payload, {
       secret: process.env.JWT_TOKEN,
-      expiresIn: '24h',
+      expiresIn: '6h',
     });
   }
 
