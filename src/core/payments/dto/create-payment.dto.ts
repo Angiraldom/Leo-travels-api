@@ -3,42 +3,6 @@ import { IsEmail, IsIn, IsNotEmpty, IsNumber, IsObject, IsOptional, IsPositive, 
 import { COUNTRIES, PREFIX, TYPE_CURRENCY } from "../interface/IPayment.interface";
 import { TYPE_DOCUMENT } from "src/core/user/constant/fieldsValidation.constant";
 
-export class CreatePaymentDto {
-    
-    @IsNotEmpty({ message: 'You must provide a currency' })
-    @IsIn(TYPE_CURRENCY, {
-        message:
-          'The type currency is incorrect. Verify the information provided.',
-    })
-    currency: string;
-
-    @IsNumber({ allowNaN: false })
-    @IsPositive({ message: 'It must be of number type (amountInCents).' })
-    @IsNotEmpty({ message: 'You must provide a amountInCents' })
-    amountInCents: number;
-
-    @IsNumber({ allowNaN: false })
-    @IsNotEmpty({ message: 'You must provide a reference' })
-    reference: number;
-
-    @IsString({ message: 'It must be of string type (amountInCents).' })
-    @IsNotEmpty({ message: 'You must provide a publicKey' })
-    publicKey: string;
-
-    @IsUrl({}, { message: 'It must be of URL type (redirectUrl).' })
-    @IsOptional()
-    redirectUrl: string;
-
-    @IsObject({ message: 'It must be of object type (customerData).' })
-    @IsOptional()
-    @ValidateNested()
-    customerData: CustomerDataDto;
-
-    @IsObject({ message: 'It must be of object shippingAddress (customerData).' })
-    @IsOptional()
-    @ValidateNested()
-    shippingAddress: ShippingAddressDto;
-}
 
 class CustomerDataDto {
     
@@ -89,3 +53,40 @@ class ShippingAddressDto {
     country: string;
 }
     
+
+export class CreatePaymentDto {
+    
+    @IsNotEmpty({ message: 'You must provide a currency' })
+    @IsIn(TYPE_CURRENCY, {
+        message:
+          'The type currency is incorrect. Verify the information provided.',
+    })
+    currency: string;
+
+    @IsNumber({ allowNaN: false })
+    @IsPositive({ message: 'It must be of number type (amountInCents).' })
+    @IsNotEmpty({ message: 'You must provide a amountInCents' })
+    amountInCents: number;
+
+    @IsString({ message: 'It must be of string type (reference).' })
+    @IsNotEmpty({ message: 'You must provide a reference' })
+    reference: string;
+
+    @IsString({ message: 'It must be of string type (amountInCents).' })
+    @IsNotEmpty({ message: 'You must provide a publicKey' })
+    publicKey: string;
+
+    @IsUrl({}, { message: 'It must be of URL type (redirectUrl).' })
+    @IsOptional()
+    redirectUrl: string;
+
+    @IsObject({ message: 'It must be of object type (customerData).' })
+    @IsOptional()
+    @ValidateNested()
+    customerData: CustomerDataDto;
+
+    @IsObject({ message: 'It must be of object shippingAddress (customerData).' })
+    @IsOptional()
+    @ValidateNested()
+    shippingAddress: ShippingAddressDto;
+}
