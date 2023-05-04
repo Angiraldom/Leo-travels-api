@@ -2,10 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 
 import { PaymentsService } from '../service/payments.service';
 import { CreatePaymentDto } from '../dto/create-payment.dto';
+import { RedisService } from 'src/shared/service/redis.service';
 
 @Controller('payments')
 export class PaymentsController {
-  constructor(private readonly paymentsService: PaymentsService) {}
+  constructor(
+    private readonly paymentsService: PaymentsService,
+    private redisService: RedisService) {}
 
   @Post()
   create(@Body() createPaymentDto: CreatePaymentDto) {
@@ -20,5 +23,15 @@ export class PaymentsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.paymentsService.findOne(+id);
+  }
+
+  @Post('saveProduct')
+  saveProduct(@Body('reference') reference: string, @Body('products') products: []) {
+    return this.redisService.saveData(reference, products);
+  }
+
+  @Get('getProducts/:reference')
+  getProducts(@Param('reference') reference: string) {
+    return this.redisService.getData(reference);
   }
 }

@@ -3,6 +3,7 @@ import { PaymentsService } from './service/payments.service';
 import { PaymentsController } from './controller/payments.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Payment, PaymentSchema } from './schema/payment.schema';
+import { RedisService } from 'src/shared/service/redis.service';
 
 @Module({
   imports: [
@@ -11,6 +12,6 @@ import { Payment, PaymentSchema } from './schema/payment.schema';
     ]),
   ],
   controllers: [PaymentsController],
-  providers: [PaymentsService]
+  providers: [PaymentsService, RedisService]
 })
 export class PaymentsModule {}

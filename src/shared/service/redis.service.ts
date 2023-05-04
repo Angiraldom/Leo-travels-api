@@ -44,7 +44,7 @@ export class RedisService {
    * @param {string} referenceWompi - Reference wompi.
    * @param {any} data - Information to save.
    */
-  async saveData(referenceWompi: string, data: any) {
+  async saveData(referenceWompi: string, data: []) {
     try {
       const CART_KEY = `cart:${referenceWompi}`;
 
@@ -55,6 +55,9 @@ export class RedisService {
       }
 
       await this.client.set(CART_KEY, JSON.stringify(data), 'EX', 3600);
+
+      return { reference: referenceWompi };
+      
     } catch (error) {
       console.error(
         `Error save data for reference ${referenceWompi}: ${error}`,
