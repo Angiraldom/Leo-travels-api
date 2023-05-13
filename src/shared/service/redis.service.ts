@@ -44,23 +44,30 @@ export class RedisService {
    * @param {string} referenceWompi - Reference wompi.
    * @param {any} data - Information to save.
    */
-  async saveData(referenceWompi: string, data: []) {
+  async saveData(body: {reference: string; product: {}}) {
     try {
-      const CART_KEY = `cart:${referenceWompi}`;
+      const CART_KEY = `cart:${body.reference}`;
 
-      const REFERENCE_EXISTS = await this.comprobateKey(CART_KEY);
+      const REFERENCE_EXISTS = await this.getData(body.reference);
 
       if (REFERENCE_EXISTS) {
         await this.client.del(CART_KEY);
+        const cart = JSON.parse(REFERENCE_EXISTS);
+        cart.products.push(body.product);
+        await this.client.set(CART_KEY, JSON.stringify(cart), 'EX', 3600);
+      } else {
+        const obj = {
+          reference: body.reference,
+          products: [body.product]
+        };
+        await this.client.set(CART_KEY, JSON.stringify(obj), 'EX', 3600);
       }
 
-      await this.client.set(CART_KEY, JSON.stringify(data), 'EX', 3600);
-
-      return { reference: referenceWompi };
+      return await this.getData(body.reference);;
       
     } catch (error) {
       console.error(
-        `Error save data for reference ${referenceWompi}: ${error}`,
+        `Error save data for reference ${body.reference}: ${error}`,
       );
     }
   }
@@ -82,12 +89,12 @@ export class RedisService {
         (product) => product._id === updatedData._id,
       );
 
-      if (productIndex !== -1) {
-        Object.assign(CART_DATA.products[productIndex], updatedData);
-        await this.saveData(referenceWompi, CART_DATA);
-      }
+      // if (productIndex !== -1) {
+      //   Object.assign(CART_DATA.products[productIndex], updatedData);
+      //   await this.saveData(referenceWompi, CART_DATA);
+      // }
 
-      await this.saveData(referenceWompi, CART_DATA);
+      // await this.saveData(referenceWompi, CART_DATA);
     } catch (error) {
       console.error(
         `Error update data for reference ${referenceWompi}: ${error}`,

@@ -26,8 +26,8 @@ export class PaymentsController {
   }
 
   @Post('saveProduct')
-  saveProduct(@Body('reference') reference: string, @Body('products') products: []) {
-    return this.redisService.saveData(reference, products);
+  saveProduct(@Body() body: {reference: string; product: {}}) {
+    return this.redisService.saveData(body);
   }
 
   @Get('getProducts/:reference')
