@@ -63,7 +63,7 @@ export class RedisService {
         await this.client.set(CART_KEY, JSON.stringify(obj), 'EX', 3600);
       }
 
-      return await this.getData(body.reference);;
+      return await this.getData(body.reference);
       
     } catch (error) {
       console.error(
@@ -74,30 +74,27 @@ export class RedisService {
 
   /**
    * Function to update the information.
-   * @param {string} referenceWompi - Reference wompi.
-   * @param updatedData - Information to update.
+   * @param {string} reference - Reference wompi.
+   * @param products - Information to update.
    */
-  async updateData(referenceWompi: string, updatedData: any) {
+  async updateAllProducts(reference: string, products: []) {
     try {
-      const CART_DATA = JSON.parse(await this.getData(referenceWompi));
 
-      if (CART_DATA.products.length === 0) {
-        return;
-      }
+      const CART_KEY = `cart:${reference}`;
 
-      const productIndex = CART_DATA.products.findIndex(
-        (product) => product._id === updatedData._id,
-      );
+      await this.client.del(CART_KEY);
 
-      // if (productIndex !== -1) {
-      //   Object.assign(CART_DATA.products[productIndex], updatedData);
-      //   await this.saveData(referenceWompi, CART_DATA);
-      // }
-
-      // await this.saveData(referenceWompi, CART_DATA);
+      const obj = {
+        reference,
+        products
+      };
+      await this.client.set(CART_KEY, JSON.stringify(obj), 'EX', 3600);
+    
+      return await this.getData(reference);
+      
     } catch (error) {
       console.error(
-        `Error update data for reference ${referenceWompi}: ${error}`,
+        `Error updating data for reference ${reference}: ${error}`,
       );
     }
   }

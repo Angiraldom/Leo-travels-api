@@ -34,4 +34,10 @@ export class PaymentsController {
   getProducts(@Param('reference') reference: string) {
     return this.redisService.getData(reference);
   }
+
+  @Patch('updateAllProducts')
+  updateAllProducts(@Body() body: {reference: string; products: []}) {
+    return this.redisService.updateAllProducts(body.reference, body.products);
+  }
 }
+
