@@ -173,4 +173,20 @@ export class UserService {
       );
     }
   }
+
+  /**
+   * Function generic to find a user by email.
+   * @param {string} email - Email to search.
+   * @returns {Promise<{_id}>} - A _id if the user exists.
+   */
+  async findUserByEmail(email: string): Promise<IUser> {
+    try {
+      return this.userModel.findOne({ email });
+    } catch (error) {
+      throw new HttpException(
+        'An error has occurred when looking for the user.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 }
