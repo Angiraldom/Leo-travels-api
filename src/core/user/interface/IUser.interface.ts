@@ -1,4 +1,5 @@
 import { Document } from 'mongoose';
+import { typeRoles } from '../constant/fieldsValidation.constant';
 
 export interface IUser extends Document {
   name?: string;
@@ -7,7 +8,7 @@ export interface IUser extends Document {
   email?: string;
   typeDocument?: string;
   numberDocument?: number;
-  rol?: string;
+  role?: typeRoles;
   municipalityDepartament?: string;
   residenceAddress?: string;
   codePostal?: number;
