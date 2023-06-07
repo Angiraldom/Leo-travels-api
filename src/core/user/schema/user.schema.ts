@@ -23,7 +23,7 @@ export class User extends Document {
   numberDocument: number;
 
   @Prop({ type: String })
-  rol: string;
+  role: string;
 
   @Prop({ type: String })
   municipalityDepartament: string;
