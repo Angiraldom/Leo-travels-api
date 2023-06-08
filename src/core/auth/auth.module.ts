@@ -19,7 +19,7 @@ import config from 'src/config';
         return {
           secret: configService.jwtSecret,
           signOptions: {
-            expiresIn: '3h',
+            expiresIn: '1h',
           },
         };
       },
