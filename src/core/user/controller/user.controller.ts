@@ -84,4 +84,12 @@ export class UserController {
     const user = req.user as IPayloadToken;
     return this.userService.findUserById(user.sub);
   }
+
+  /**
+   * Controller of the method send mail when forgots password.
+   */
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    return this.userService.sendEmail(email);
+  }
 }

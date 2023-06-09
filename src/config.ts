@@ -14,5 +14,6 @@ export default registerAs('configuration', () => {
       password: process.env.EMAIL_PASSWORD,
     },
     jwtSecret: process.env.JWT_SECRET,
+    jwtSecretRecoverPassword: process.env.JWT_SECRET_RECOVER_PASSWORD,
   };
 });

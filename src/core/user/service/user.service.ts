@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { Model } from 'mongoose';
@@ -14,10 +14,19 @@ import {
 } from '../../../shared/utils/utilities/Response.util';
 import { encrypt } from '../../../shared/function/encryptPassword.function';
 import { REQUIRED_PROPERTIES } from '../constant/fieldsValidation.constant';
+import { EmailService } from 'src/shared/service/email.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigType } from '@nestjs/config';
+import config from 'src/config';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel('Users') private readonly userModel: Model<IUser>) {}
+  constructor(
+    private configs: ConfigType<typeof config>,
+    @InjectModel('Users') private readonly userModel: Model<IUser>,
+    private emailService: EmailService,
+    private jwtService: JwtService,
+  ) {}
 
   /**
    * Method responsible for obtaining all users.
@@ -213,5 +222,53 @@ export class UserService {
       });
     }
     return response;
+  }
+
+  /**
+   * Send email for reseting password.
+   * @param email Verificate the email.
+   */
+  async sendEmail(email: string) {
+    let response: IRequestResponse;
+    try {
+      const user = await this.findUserByEmail(email);
+      if (!user) {
+        throw new HttpException(
+          "The email doesn't exist",
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      const token = this.generateTokenPassword(user);
+      const data = {
+        ...user,
+        link: `http://localhost:4200/change-password?token=${token}`,
+      };
+      const configEmail = {
+        subject: 'Cambio de contraseña',
+        from: 'Email test',
+        to: data.email,
+      };
+      await this.emailService.sendMail(configEmail, data, 'forgot-password');
+    } catch (error) {
+      response = buildResponseFail({
+        msg: error.message,
+        state: false,
+      });
+    }
+    return response;
+  }
+
+  /**
+   * Generate token for changing password.
+   */
+  generateTokenPassword(user: IUser) {
+    const token = this.jwtService.sign(
+      { sub: user._id },
+      {
+        secret: this.configs.jwtSecretRecoverPassword,
+        expiresIn: '20min',
+      },
+    );
+    return token;
   }
 }
