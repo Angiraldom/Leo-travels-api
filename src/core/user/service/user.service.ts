@@ -189,4 +189,29 @@ export class UserService {
       );
     }
   }
+
+  /**
+   * Function generic to find a user by email.
+   * @param {string} email - Email to search.
+   * @returns {Promise<{_id}>} - A _id if the user exists.
+   */
+  async findUserById(id: string) {
+    let response: IRequestResponse;
+    try {
+      const user = await this.userModel.findById(id, { password: 0 });
+
+      if (!user) {
+        throw new HttpException("The user doesn't exist", HttpStatus.NOT_FOUND);
+      }
+      response = buildResponseSuccess({
+        data: user,
+      });
+    } catch (error) {
+      response = buildResponseFail({
+        msg: error.message,
+        state: false,
+      });
+    }
+    return response;
+  }
 }

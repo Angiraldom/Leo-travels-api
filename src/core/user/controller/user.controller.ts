@@ -1,10 +1,21 @@
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 
-import { Response } from 'express';
+import { Response, Request } from 'express';
 
 import { UserService } from '../service/user.service';
 import { AddUserDto, DeleteUserDto, UpdateUserDto } from '../dto';
+import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
+import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -63,5 +74,14 @@ export class UserController {
       console.log('Error método: updateUser');
       return res.status(400).json(error);
     }
+  }
+
+  /**
+   * Controller of the method findUserById.
+   */
+  @Get('getProfile')
+  async findUserById(@Req() req: Request) {
+    const user = req.user as IPayloadToken;
+    return this.userService.findUserById(user.sub);
   }
 }

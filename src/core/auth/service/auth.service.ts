@@ -5,6 +5,7 @@ import { IUser } from 'src/core/user/interface/IUser.interface';
 import { UserService } from 'src/core/user/service/user.service';
 import { comparePassword } from 'src/shared/function/encryptPassword.function';
 import { IPayloadToken } from '../interface/IPayloadToken.interface';
+import { buildResponseSuccess } from 'src/shared/utils/utilities/Response.util';
 
 @Injectable()
 export class AuthService {
@@ -40,10 +41,13 @@ export class AuthService {
    * @returns The token and user data.
    */
   generateJWT(user: IUser) {
-    const payload: IPayloadToken = { role: user.role, sub: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-      user,
-    };
+    const payload: IPayloadToken = { role: user.role, sub: user._id };
+    const response = buildResponseSuccess({
+      data: {
+        access_token: this.jwtService.sign(payload),
+        user,
+      },
+    });
+    return response;
   }
 }
