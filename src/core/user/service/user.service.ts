@@ -198,7 +198,7 @@ export class UserService {
   async findUserById(id: string) {
     let response: IRequestResponse;
     try {
-      const user = await this.userModel.findById(id);
+      const user = await this.userModel.findById(id, { password: 0 });
 
       if (!user) {
         throw new HttpException("The user doesn't exist", HttpStatus.NOT_FOUND);

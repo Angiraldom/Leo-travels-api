@@ -1,34 +1,21 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
+import { AuthGuard } from '@nestjs/passport';
 
-import { ROLES_KEY } from '../decorators/roles.decorator';
-import { Role } from '../interface/IRole.interface';
-import { IPayloadToken } from '../interface/IPayloadToken.interface';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { ExtractJwt } from 'passport-jwt';
 
 @Injectable()
-export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const roles = this.reflector.get<Role[]>(ROLES_KEY, context.getHandler());
-    if (!roles) {
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  constructor(private reflector: Reflector) {
+    super();
+  }
+
+  canActivate(context: ExecutionContext) {
+    const isPublic = this.reflector.get(IS_PUBLIC_KEY, context.getHandler());
+    if (isPublic) {
       return true;
     }
-
-    const request = context.switchToHttp().getRequest();
-    const user = request.user as IPayloadToken;
-
-    const isAuth = roles.some((role) => role === user.role);
-    if (!isAuth) {
-      throw new UnauthorizedException('your role is wrong');
-    }
-    return isAuth;
+    return super.canActivate(context);
   }
 }
