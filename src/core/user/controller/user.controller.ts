@@ -92,4 +92,12 @@ export class UserController {
   async forgotPassword(@Body('email') email: string) {
     return this.userService.sendEmail(email);
   }
+
+  /**
+   * Controller of the method change password.
+   */
+  @Post('change-password')
+  async changePassword(@Body() body: { password: string; token: string }) {
+    return this.userService.changePassword(body.password, body.token);
+  }
 }

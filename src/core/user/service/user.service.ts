@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-
 import { Model } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigType } from '@nestjs/config';
 
 import { IUser } from '../interface/IUser.interface';
 import { IRequestResponse } from './../../../shared/utils/interface/IRequestResponse.interface';
@@ -15,14 +16,13 @@ import {
 import { encrypt } from '../../../shared/function/encryptPassword.function';
 import { REQUIRED_PROPERTIES } from '../constant/fieldsValidation.constant';
 import { EmailService } from 'src/shared/service/email.service';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigType } from '@nestjs/config';
-import config from 'src/config';
+import configuration from '../../../config';
+import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
 
 @Injectable()
 export class UserService {
   constructor(
-    private configs: ConfigType<typeof config>,
+    @Inject(configuration.KEY) private config: ConfigType<typeof configuration>,
     @InjectModel('Users') private readonly userModel: Model<IUser>,
     private emailService: EmailService,
     private jwtService: JwtService,
@@ -248,7 +248,14 @@ export class UserService {
         from: 'Email test',
         to: data.email,
       };
-      await this.emailService.sendMail(configEmail, data, 'forgot-password');
+      const res = await this.emailService.sendMail(
+        configEmail,
+        data,
+        'forgot-password',
+      );
+      response = buildResponseSuccess({
+        data: res ?? 'The mail was send successfully',
+      });
     } catch (error) {
       response = buildResponseFail({
         msg: error.message,
@@ -265,10 +272,34 @@ export class UserService {
     const token = this.jwtService.sign(
       { sub: user._id },
       {
-        secret: this.configs.jwtSecretRecoverPassword,
+        secret: this.config.jwtSecretRecoverPassword,
         expiresIn: '20min',
       },
     );
     return token;
+  }
+
+  async changePassword(password: string, token: string) {
+    let response: IRequestResponse;
+    try {
+      const payload: IPayloadToken = this.jwtService.verify(token, {
+        secret: this.config.jwtSecretRecoverPassword,
+      });
+      const hasPassword = await encrypt(password);
+      const userUpdate = await this.userModel.findByIdAndUpdate(payload.sub, {
+        password: hasPassword,
+        _id: payload.sub,
+      });
+
+      response = buildResponseSuccess({
+        data: userUpdate ?? 'The password was change succesful',
+      });
+    } catch (error) {
+      response = buildResponseFail({
+        msg: error.message,
+        state: false,
+      });
+    }
+    return response;
   }
 }

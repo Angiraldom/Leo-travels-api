@@ -23,8 +23,8 @@ export class EmailService {
       host: 'smtp.ethereal.email',
       port: 587,
       auth: {
-        user: 'rahsaan.jacobson85@ethereal.email',
-        pass: 'gSYEtu8adeMZjpwwaD',
+        user: 'christina46@ethereal.email',
+        pass: 'qsmMYYwE989Q8VnYNZ',
       },
     });
     return transporter;
@@ -49,10 +49,11 @@ export class EmailService {
     const transporter = this.createTransporter();
     try {
       const emailTemplate = await this.compile(templateName, data);
-      await transporter.sendMail({
+      const responseEmail = await transporter.sendMail({
         ...configMail,
         html: emailTemplate,
       });
+      return responseEmail;
     } catch (error) {
       // Validar con carlos como agregar el mensaje.
       throw new InternalServerErrorException('Problema no controlado');
