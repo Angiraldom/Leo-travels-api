@@ -1,8 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import * as fs from 'fs-extra';
@@ -23,8 +19,8 @@ export class EmailService {
       host: 'smtp.ethereal.email',
       port: 587,
       auth: {
-        user: 'christina46@ethereal.email',
-        pass: 'qsmMYYwE989Q8VnYNZ',
+        user: 'theo.eichmann@ethereal.email',
+        pass: 'TQsc76J7pHMRXddNEa'
       },
     });
     return transporter;
@@ -47,17 +43,12 @@ export class EmailService {
     templateName: string,
   ) {
     const transporter = this.createTransporter();
-    try {
-      const emailTemplate = await this.compile(templateName, data);
-      const responseEmail = await transporter.sendMail({
-        ...configMail,
-        html: emailTemplate,
-      });
-      return responseEmail;
-    } catch (error) {
-      // Validar con carlos como agregar el mensaje.
-      throw new InternalServerErrorException('Problema no controlado');
-    }
+    const emailTemplate = await this.compile(templateName, data);
+    const responseEmail = await transporter.sendMail({
+      ...configMail,
+      html: emailTemplate,
+    });
+    return responseEmail;
   }
 
   async compile(templateName: string, data) {
