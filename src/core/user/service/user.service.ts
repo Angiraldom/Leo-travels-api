@@ -1,7 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-
 import { Model } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigType } from '@nestjs/config';
 
 import { IUser } from '../interface/IUser.interface';
 import { IRequestResponse } from './../../../shared/utils/interface/IRequestResponse.interface';
@@ -14,10 +15,18 @@ import {
 } from '../../../shared/utils/utilities/Response.util';
 import { encrypt } from '../../../shared/function/encryptPassword.function';
 import { REQUIRED_PROPERTIES } from '../constant/fieldsValidation.constant';
+import { EmailService } from 'src/shared/service/email.service';
+import configuration from '../../../config';
+import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel('Users') private readonly userModel: Model<IUser>) {}
+  constructor(
+    @Inject(configuration.KEY) private config: ConfigType<typeof configuration>,
+    @InjectModel('Users') private readonly userModel: Model<IUser>,
+    private emailService: EmailService,
+    private jwtService: JwtService,
+  ) {}
 
   /**
    * Method responsible for obtaining all users.
@@ -205,6 +214,85 @@ export class UserService {
       }
       response = buildResponseSuccess({
         data: user,
+      });
+    } catch (error) {
+      response = buildResponseFail({
+        msg: error.message,
+        state: false,
+      });
+    }
+    return response;
+  }
+
+  /**
+   * Send email for reseting password.
+   * @param email Verificate the email.
+   */
+  async sendEmail(email: string) {
+    let response: IRequestResponse;
+    try {
+      const user = await this.findUserByEmail(email);
+      if (!user) {
+        throw new HttpException(
+          "The email doesn't exist",
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      const token = this.generateTokenPassword(user);
+      const data = {
+        ...user,
+        link: `http://localhost:4200/change-password?token=${token}`,
+      };
+      const configEmail = {
+        subject: 'Cambio de contraseña',
+        from: 'Email test',
+        to: data.email,
+      };
+      const res = await this.emailService.sendMail(
+        configEmail,
+        data,
+        'forgot-password',
+      );
+      response = buildResponseSuccess({
+        data: res ?? 'The mail was send successfully',
+      });
+    } catch (error) {
+      response = buildResponseFail({
+        msg: error.message,
+        state: false,
+      });
+    }
+    return response;
+  }
+
+  /**
+   * Generate token for changing password.
+   */
+  generateTokenPassword(user: IUser) {
+    const token = this.jwtService.sign(
+      { sub: user._id },
+      {
+        secret: this.config.jwtSecretRecoverPassword,
+        expiresIn: '20min',
+      },
+    );
+    return token;
+  }
+
+  async changePassword(password: string, token: string) {
+    let response: IRequestResponse;
+    try {
+      const payload: IPayloadToken = this.jwtService.verify(token, {
+        secret: this.config.jwtSecretRecoverPassword,
+      });
+      const hasPassword = await encrypt(password);
+      const userUpdate = await this.userModel.findByIdAndUpdate(payload.sub, {
+        password: hasPassword,
+        _id: payload.sub,
+      });
+
+      response = buildResponseSuccess({
+        data: userUpdate ?? 'The password was change succesful',
       });
     } catch (error) {
       response = buildResponseFail({
