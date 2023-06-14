@@ -1,68 +1,46 @@
 import { IRequestResponse } from '../interface/IRequestResponse.interface';
-
-export const buildResponseCreate = ({
-  data,
-  msg,
-  state,
-}: IRequestResponse): IRequestResponse => {
-  return {
-    data: data || {},
-    msg:
-      msg ||
-      'The request was successful and as a result a new resource was created.',
-    state: state ?? true,
-    code: 201,
-  };
-};
+import { Request } from 'express';
+import { HttpException } from '@nestjs/common';
+import { IErrorResponse } from '../interface/IErrorResponse.interface';
 
 export const buildResponseSuccess = ({
   data,
   msg,
-  state,
+  code = 200,
 }: IRequestResponse): IRequestResponse => {
   return {
     data: data || {},
     msg: msg || 'The request was successful.',
-    state: state ?? true,
-    code: 200,
+    code,
   };
 };
 
-export const buildResponseFail = ({
-  data,
-  msg,
-  state,
-}: IRequestResponse): IRequestResponse => {
+const defaultError = (
+  exception: HttpException,
+  request: Request,
+): IErrorResponse => {
   return {
-    data: data || {},
-    msg: msg || 'An error has ocurred in the application, we apoligize.',
-    state: state ?? false,
-    code: 400,
+    timestamp: new Date().toISOString(),
+    path: request.url,
+    exceptionMessage: exception.message,
+    typeException: exception.name,
+    statusCode: 500,
+    customMessage: 'Something is wrong.',
+    tag: 'ErrorServer',
   };
 };
 
-export const buildResponseUnauthorized = ({
-  data,
-  msg,
-  state,
-}: IRequestResponse): IRequestResponse => {
+export const BuildReponseError = (
+  exception: HttpException,
+  request: Request,
+): IErrorResponse => {
+  if (!exception.getStatus) {
+    return defaultError(exception, request);
+  }
   return {
-    data: data || {},
-    msg: msg || 'User not authorized to make this request.',
-    state: state ?? false,
-    code: 401,
-  };
-};
-
-export const buildResponseNotFound = ({
-  data,
-  msg,
-  state,
-}: IRequestResponse): IRequestResponse => {
-  return {
-    data: data || {},
-    msg: msg || 'The server cannot find the request resource.',
-    state: state ?? false,
-    code: 404,
+    ...defaultError(exception, request),
+    statusCode: exception.getStatus(),
+    customMessage: exception.getResponse()['customMessage'],
+    tag: exception.getResponse()['tag'],
   };
 };

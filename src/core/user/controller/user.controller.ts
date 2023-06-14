@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   Res,
+  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 
@@ -14,7 +15,10 @@ import { UserService } from '../service/user.service';
 import { AddUserDto, DeleteUserDto, UpdateUserDto } from '../dto';
 import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
+import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
+import { Public } from 'src/core/auth/decorators/public.decorator';
 
+@UseFilters(HttpExceptionFilter)
 @UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UserController {
@@ -88,6 +92,7 @@ export class UserController {
   /**
    * Controller of the method send mail when forgots password.
    */
+  @Public()
   @Post('forgot-password')
   async forgotPassword(@Body('email') email: string) {
     return this.userService.sendEmail(email);
@@ -96,6 +101,7 @@ export class UserController {
   /**
    * Controller of the method change password.
    */
+  @Public()
   @Post('change-password')
   async changePassword(@Body() body: { password: string; token: string }) {
     return this.userService.changePassword(body.password, body.token);

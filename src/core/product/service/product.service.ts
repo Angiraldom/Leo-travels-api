@@ -5,11 +5,7 @@ import { Model } from 'mongoose';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../schema/product.schema';
-import { IRequestResponse } from 'src/shared/utils/interface/IRequestResponse.interface';
-import {
-  buildResponseFail,
-  buildResponseSuccess,
-} from 'src/shared/utils/utilities/Response.util';
+import { buildResponseSuccess } from 'src/shared/utils/utilities/Response.util';
 
 @Injectable()
 export class ProductService {
@@ -19,39 +15,21 @@ export class ProductService {
   ) {}
 
   async create(createProductDto: CreateProductDto) {
-    let response: IRequestResponse;
-    try {
-      createProductDto['createdAt'] = new Date();
-      const newProduct = new this.productModel(createProductDto);
-      await newProduct.save();
+    createProductDto['createdAt'] = new Date();
+    const newProduct = new this.productModel(createProductDto);
+    await newProduct.save();
 
-      response = buildResponseSuccess({
-        data: newProduct,
-      });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
-      });
-    }
-    return response;
+    return buildResponseSuccess({
+      data: newProduct,
+    });
   }
 
   async findAll(projection?: unknown) {
-    let response: IRequestResponse;
-    try {
-      const products = await this.productModel.find({}, projection);
+    const products = await this.productModel.find({}, projection);
 
-      response = buildResponseSuccess({
-        data: products,
-      });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
-      });
-    }
-    return response;
+    return buildResponseSuccess({
+      data: products,
+    });
   }
 
   findOne(id: string) {
@@ -59,29 +37,20 @@ export class ProductService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-    let response: IRequestResponse;
-    try {
-      const unSet = { $unset: {} };
-      if (updateProductDto.isCourse) {
-        unSet.$unset = { weight: 1 };
-      } else {
-        unSet.$unset = { modules: 1 };
-      }
-
-      const product = await this.productModel.updateOne(
-        { _id: id },
-        { $set: updateProductDto, ...unSet },
-      );
-
-      response = buildResponseSuccess({
-        data: product,
-      });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
-      });
+    const unSet = { $unset: {} };
+    if (updateProductDto.isCourse) {
+      unSet.$unset = { weight: 1 };
+    } else {
+      unSet.$unset = { modules: 1 };
     }
-    return response;
+
+    const product = await this.productModel.updateOne(
+      { _id: id },
+      { $set: updateProductDto, ...unSet },
+    );
+
+    return buildResponseSuccess({
+      data: product,
+    });
   }
 }

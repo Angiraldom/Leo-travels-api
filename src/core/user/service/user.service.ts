@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
@@ -8,11 +14,7 @@ import { IUser } from '../interface/IUser.interface';
 import { IRequestResponse } from './../../../shared/utils/interface/IRequestResponse.interface';
 import { AddUserDto, DeleteUserDto, UpdateUserDto } from '../dto';
 import { validateAction } from '../../../shared/function/validateAction.function';
-import {
-  buildResponseCreate,
-  buildResponseFail,
-  buildResponseSuccess,
-} from '../../../shared/utils/utilities/Response.util';
+import { buildResponseSuccess } from '../../../shared/utils/utilities/Response.util';
 import { encrypt } from '../../../shared/function/encryptPassword.function';
 import { REQUIRED_PROPERTIES } from '../constant/fieldsValidation.constant';
 import { EmailService } from 'src/shared/service/email.service';
@@ -33,21 +35,9 @@ export class UserService {
    * @returns {Promise<IRequestResponse>} - Response method.
    */
   async getAllUsers(): Promise<IRequestResponse> {
-    let response: IRequestResponse;
-    try {
-      const ALL_USERS = await this.userModel
-        .find({}, { password: 0 })
-        .sort({ name: 1 });
-      response = buildResponseSuccess({
-        data: ALL_USERS,
-      });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
-      });
-    }
-    return response;
+    return buildResponseSuccess({
+      data: await this.userModel.find({}, { password: 0 }).sort({ name: 1 }),
+    });
   }
 
   /**
@@ -56,34 +46,25 @@ export class UserService {
    * @returns {Promise<IRequestResponse>} - Response method.
    */
   async addUser(user: AddUserDto): Promise<IRequestResponse> {
-    let response: IRequestResponse;
-    try {
-      //Validate user by identification.
-      const EXIST_USER = await this.findUser({
-        numberDocument: user.numberDocument,
-      });
+    //Validate user by identification.
+    const EXIST_USER = await this.findUser({
+      numberDocument: user.numberDocument,
+    });
 
-      await validateAction(
-        true,
-        EXIST_USER?._id,
-        'The user is already registered.',
-      );
+    await validateAction(
+      true,
+      EXIST_USER?._id,
+      'The user is already registered.',
+    );
 
-      //Encrypt password.
-      const PASSWORD = await encrypt(user?.password);
+    //Encrypt password.
+    const PASSWORD = await encrypt(user?.password);
 
-      //Save user.
-      const NEW_USER = new this.userModel({ ...user, password: PASSWORD });
-      await NEW_USER.save();
+    //Save user.
+    const NEW_USER = new this.userModel({ ...user, password: PASSWORD });
+    await NEW_USER.save();
 
-      response = buildResponseCreate({ data: true });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
-      });
-    }
-    return response;
+    return buildResponseSuccess({ code: 201, data: true });
   }
 
   /**
@@ -92,43 +73,34 @@ export class UserService {
    * @returns {Promise<IRequestResponse>} - Response method.
    */
   async updateUser(userToUpdate: UpdateUserDto): Promise<IRequestResponse> {
-    let response: IRequestResponse;
-    try {
-      //Check if userToUpdate has at least one "required" properties.
-      await validateAction(
-        false,
-        Object.keys(userToUpdate).some((property) =>
-          REQUIRED_PROPERTIES.has(property),
-        ),
-        'Verify the information provided. The values are not valid.',
-      );
+    //Check if userToUpdate has at least one "required" properties.
+    await validateAction(
+      false,
+      Object.keys(userToUpdate).some((property) =>
+        REQUIRED_PROPERTIES.has(property),
+      ),
+      'Verify the information provided. The values are not valid.',
+    );
 
-      //validate user by _id.
-      const EXIST_USER = await this.findUser({
-        _id: userToUpdate._id,
-      });
+    //validate user by _id.
+    const EXIST_USER = await this.findUser({
+      _id: userToUpdate._id,
+    });
 
-      await validateAction(
-        true,
-        EXIST_USER?._id === undefined,
-        'The user does not exist.',
-      );
+    await validateAction(
+      true,
+      EXIST_USER?._id === undefined,
+      'The user does not exist.',
+    );
 
-      //Update user.
-      await this.userModel.findByIdAndUpdate(userToUpdate._id, userToUpdate, {
-        new: true,
-      });
+    //Update user.
+    await this.userModel.findByIdAndUpdate(userToUpdate._id, userToUpdate, {
+      new: true,
+    });
 
-      response = buildResponseSuccess({
-        data: true,
-      });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
-      });
-    }
-    return response;
+    return buildResponseSuccess({
+      data: true,
+    });
   }
 
   /**
@@ -137,34 +109,25 @@ export class UserService {
    * @returns {Promise<IRequestResponse>} - Response method.
    */
   async deleteUser(userToDelete: DeleteUserDto): Promise<IRequestResponse> {
-    let response: IRequestResponse;
-    try {
-      const { _id } = userToDelete;
+    const { _id } = userToDelete;
 
-      //validate user by _id.
-      const EXIST_USER = await this.findUser({
-        _id,
-      });
+    //validate user by _id.
+    const EXIST_USER = await this.findUser({
+      _id,
+    });
 
-      await validateAction(
-        true,
-        EXIST_USER?._id === undefined,
-        'The user does not exist.',
-      );
+    await validateAction(
+      true,
+      EXIST_USER?._id === undefined,
+      'The user does not exist.',
+    );
 
-      //Delete user.
-      await this.userModel.findByIdAndDelete(_id);
+    //Delete user.
+    await this.userModel.findByIdAndDelete(_id);
 
-      response = buildResponseSuccess({
-        data: true,
-      });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
-      });
-    }
-    return response;
+    return buildResponseSuccess({
+      data: true,
+    });
   }
 
   /**
@@ -173,14 +136,7 @@ export class UserService {
    * @returns {Promise<{_id}>} - A _id if the user exists.
    */
   private async findUser(objSearch: any): Promise<{ _id }> {
-    try {
-      return this.userModel.findOne(objSearch, { _id: 1 });
-    } catch (error) {
-      throw new HttpException(
-        'An error has occurred when looking for the user.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return this.userModel.findOne(objSearch, { _id: 1 });
   }
 
   /**
@@ -189,14 +145,7 @@ export class UserService {
    * @returns {Promise<{_id}>} - A _id if the user exists.
    */
   async findUserByEmail(email: string): Promise<IUser> {
-    try {
-      return this.userModel.findOne({ email });
-    } catch (error) {
-      throw new HttpException(
-        'An error has occurred when looking for the user.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return this.userModel.findOne({ email }).lean();
   }
 
   /**
@@ -205,23 +154,15 @@ export class UserService {
    * @returns {Promise<{_id}>} - A _id if the user exists.
    */
   async findUserById(id: string) {
-    let response: IRequestResponse;
-    try {
-      const user = await this.userModel.findById(id, { password: 0 });
+    const user = await this.userModel.findById(id, { password: 0 });
 
-      if (!user) {
-        throw new HttpException("The user doesn't exist", HttpStatus.NOT_FOUND);
-      }
-      response = buildResponseSuccess({
-        data: user,
-      });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
-      });
+    if (!user) {
+      throw new HttpException("The user doesn't exist", HttpStatus.NOT_FOUND);
     }
-    return response;
+
+    return buildResponseSuccess({
+      data: user,
+    });
   }
 
   /**
@@ -229,40 +170,33 @@ export class UserService {
    * @param email Verificate the email.
    */
   async sendEmail(email: string) {
-    let response: IRequestResponse;
-    try {
-      const user = await this.findUserByEmail(email);
-      if (!user) {
-        throw new HttpException(
-          "The email doesn't exist",
-          HttpStatus.NOT_FOUND,
-        );
-      }
-      const token = this.generateTokenPassword(user);
-      const data = {
-        ...user,
-        link: `http://localhost:4200/change-password?token=${token}`,
-      };
-      const configEmail = {
-        subject: 'Cambio de contraseña',
-        from: 'Email test',
-        to: data.email,
-      };
-      const res = await this.emailService.sendMail(
-        configEmail,
-        data,
-        'forgot-password',
-      );
-      response = buildResponseSuccess({
-        data: res ?? 'The mail was send successfully',
-      });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
+    const user = await this.findUserByEmail(email);
+    if (!user) {
+      throw new NotFoundException({
+        customMessage: 'El email no existe',
+        tag: 'ErrorEmailNotFound',
       });
     }
-    return response;
+    const token = this.generateTokenPassword(user);
+    const data = {
+      ...user,
+      link: `http://localhost:4200/change-password?token=${token}`,
+    };
+    console.log(data);
+    
+    const configEmail = {
+      subject: 'Cambio de contraseña',
+      from: 'Email test',
+      to: data.email,
+    };
+    const res = await this.emailService.sendMail(
+      configEmail,
+      data,
+      'forgot-password',
+    );
+    return buildResponseSuccess({
+      data: res ?? 'The mail was send successfully',
+    });
   }
 
   /**
@@ -280,26 +214,17 @@ export class UserService {
   }
 
   async changePassword(password: string, token: string) {
-    let response: IRequestResponse;
-    try {
-      const payload: IPayloadToken = this.jwtService.verify(token, {
-        secret: this.config.jwtSecretRecoverPassword,
-      });
-      const hasPassword = await encrypt(password);
-      const userUpdate = await this.userModel.findByIdAndUpdate(payload.sub, {
-        password: hasPassword,
-        _id: payload.sub,
-      });
+    const payload: IPayloadToken = this.jwtService.verify(token, {
+      secret: this.config.jwtSecretRecoverPassword,
+    });
+    const hasPassword = await encrypt(password);
+    const userUpdate = await this.userModel.findByIdAndUpdate(payload.sub, {
+      password: hasPassword,
+      _id: payload.sub,
+    });
 
-      response = buildResponseSuccess({
-        data: userUpdate ?? 'The password was change succesful',
-      });
-    } catch (error) {
-      response = buildResponseFail({
-        msg: error.message,
-        state: false,
-      });
-    }
-    return response;
+    return buildResponseSuccess({
+      data: userUpdate ?? 'The password was change succesful',
+    });
   }
 }
