@@ -3,10 +3,11 @@ import { ProductService } from './service/product.service';
 import { ProductController } from './controller/product.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from './schema/product.schema';
+import { UploadImagesService } from 'src/shared/service/upload-images.service';
 
 @Module({
   imports: [ MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]) ],
   controllers: [ProductController],
-  providers: [ProductService]
+  providers: [ProductService, UploadImagesService]
 })
 export class ProductModule {}
