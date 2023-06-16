@@ -32,10 +32,6 @@ export class CreateProductDto {
   @IsNotEmpty({ message: 'You must provide a price' })
   price: number;
 
-  @IsBoolean({ message: 'It must be of boolean type (isCourse).' })
-  @IsNotEmpty({ message: 'You must provide a isCourse' })
-  isCourse: boolean;
-
   @IsNumber(
     { allowNaN: false },
     { message: 'It must be of number type (weight).' },

@@ -13,6 +13,12 @@ export default registerAs('configuration', () => {
       username: process.env.EMAIL,
       password: process.env.EMAIL_PASSWORD,
     },
+    aws: {
+      name: process.env.BUCKET_NAME,
+      region: process.env.BUCKET_REGION,
+      key: process.env.ACCESS_KEY,
+      secret: process.env.SECRET_ACCESS_KEY,
+    },
     jwtSecret: process.env.JWT_SECRET,
     jwtSecretRecoverPassword: process.env.JWT_SECRET_RECOVER_PASSWORD,
   };
