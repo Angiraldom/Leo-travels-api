@@ -11,5 +11,5 @@ export class Modules extends Document {
   description: string;
 
   @Prop({ type: Array<Videos> })
-  videos: Array<Videos>;
+  classes: Array<Videos>;
 }

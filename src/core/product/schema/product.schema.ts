@@ -1,8 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-
-import { User } from 'src/core/user/schema/user.schema';
-import { Modules } from './moduls.schema';
+import { ModulesDto } from '../dto/moduls.dto';
 
 @Schema()
 export class Product extends Document {
@@ -27,6 +25,9 @@ export class Product extends Document {
   @Prop({ type: Array<string> })
   images: Array<string>;
 
+  @Prop({ type: String })
+  portada: string;
+
   @Prop({ type: Number })
   broad: number;
 
@@ -39,8 +40,8 @@ export class Product extends Document {
   // @Prop({ type: Array<string> })
   // tags: Array<string>;
 
-  @Prop({ type: Array<Modules> })
-  modules: Array<Modules>;
+  @Prop({ type: Array<ModulesDto> })
+  modules: Array<ModulesDto>;
 
   @Prop({ type: Boolean, default: true })
   status: boolean;

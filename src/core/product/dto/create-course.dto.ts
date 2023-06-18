@@ -1,4 +1,7 @@
+import { Type } from 'class-transformer';
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsNumber,
@@ -6,9 +9,13 @@ import {
   IsPositive,
   IsString,
   Min,
+  ValidateIf,
+  ValidateNested,
 } from 'class-validator';
 
-export class CreateProductDto {
+import { ModulesDto } from './moduls.dto';
+
+export class CreateCourseDto {
   @IsString({ message: 'It must be of string type (name).' })
   @IsNotEmpty({ message: 'You must provide a name' })
   name: string;
@@ -27,14 +34,6 @@ export class CreateProductDto {
 
   @IsNumber(
     { allowNaN: false },
-    { message: 'It must be of number type (weight).' },
-  )
-  @IsPositive({ message: 'You must provide a positive number weight' })
-  @IsOptional()
-  weight: number;
-
-  @IsNumber(
-    { allowNaN: false },
     { message: 'It must be of number type (discount).' },
   )
   @Min(0, { message: 'You must provide a positive number discount' })
@@ -49,6 +48,13 @@ export class CreateProductDto {
   @IsNotEmpty({ message: 'You must provide a status' })
   @IsOptional()
   status: boolean;
+
+  // @ValidateIf((body) => body.isCourse)
+  // @IsArray()
+  // @ArrayNotEmpty({ message: 'videos must be an array' })
+  // @ValidateNested({ each: true })
+  // @Type(() => ModulesDto)
+  // modules: ModulesDto[];
 
   //   @IsObject({ message: 'You must provide a valid creator' })
   //   @IsNotEmptyObject({nullable: false}, { message: 'You must provide a valid creator' })

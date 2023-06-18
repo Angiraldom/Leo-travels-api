@@ -3,13 +3,19 @@ import {
   ArrayMinSize,
   IsArray,
   IsNotEmpty,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { ClassDto } from './class.dto';
 
-import { VideosDto } from './videos.dto';
 
 export class ModulesDto {
+
+  @IsString({ message: 'It must be of string type (_id).' })
+  @IsOptional()
+  _id: string;
+
   @IsString({ message: 'It must be of string type (name).' })
   @IsNotEmpty({ message: 'You must provide a name' })
   name: string;
@@ -18,9 +24,10 @@ export class ModulesDto {
   @IsNotEmpty({ message: 'You must provide a description' })
   description: string;
 
-  @IsArray()
-  @ArrayMinSize(1, { message: 'You must provide a value in videos' })
-  @ValidateNested({ each: true })
-  @Type(() => VideosDto)
-  videos: VideosDto[];
+  // @IsArray()
+  // @ArrayMinSize(1, { message: 'You must provide a value in videos' })
+  // @ValidateNested({ each: true })
+  @IsOptional()
+  @Type(() => ClassDto)
+  classes: ClassDto[];
 }
