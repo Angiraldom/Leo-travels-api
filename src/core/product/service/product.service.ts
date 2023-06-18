@@ -37,6 +37,7 @@ export class ProductService {
 
     createProductDto['createdAt'] = new Date();
     createProductDto['images'] = urlsImages;
+    createProductDto['isCourse'] = false;
     const newProduct = new this.productModel(createProductDto);
     await newProduct.save();
 

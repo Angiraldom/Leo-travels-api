@@ -15,26 +15,26 @@ export class EmailService {
   ) {}
 
   createTransporter() {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      auth: {
-        user: 'theo.eichmann@ethereal.email',
-        pass: 'TQsc76J7pHMRXddNEa'
-      },
-    });
-    return transporter;
     // const transporter = nodemailer.createTransport({
-    //   host: 'smtp.gmail.com',
-    //   port: 465,
-    //   secure: true,
+    //   host: 'smtp.ethereal.email',
+    //   port: 587,
     //   auth: {
-    //     user: this.config.email.username,
-    //     pass: this.config.email.password,
+    //     user: 'theo.eichmann@ethereal.email',
+    //     pass: 'TQsc76J7pHMRXddNEa'
     //   },
-    //   tls: { rejectUnauthorized: false },
     // });
     // return transporter;
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: this.config.email.username,
+        pass: this.config.email.password,
+      },
+      tls: { rejectUnauthorized: false },
+    });
+    return transporter;
   }
 
   async sendMail(
