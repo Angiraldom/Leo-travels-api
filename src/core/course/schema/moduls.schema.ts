@@ -1,7 +1,6 @@
 import { Prop } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-
-import { Videos } from './videos.schema';
+import { Classes } from './classes.schema';
 
 export class Modules extends Document {
   @Prop({ type: String })
@@ -10,6 +9,6 @@ export class Modules extends Document {
   @Prop({ type: String })
   description: string;
 
-  @Prop({ type: Array<Videos> })
-  classes: Array<Videos>;
+  @Prop({ type: Array<Classes> })
+  classes: Array<Classes>;
 }
