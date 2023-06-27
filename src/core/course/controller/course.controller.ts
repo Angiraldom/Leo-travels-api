@@ -21,8 +21,14 @@ export class CourseController {
   @Post()
   @UseInterceptors(FileInterceptor('image'))
   create(@UploadedFile() file, @Body() data) {
-    return this.courseService.create(JSON.parse(data.data), file);
+    return this.courseService.create(JSON.parse(data.data));
   }
+
+  // @Post()
+  // @UseInterceptors(FileInterceptor('image'))
+  // create(@UploadedFile() file, @Body() data) {
+  //   return this.courseService.create(JSON.parse(data.data), file);
+  // }
 
   @Post('module/:id')
   createModule(@Param('id') id: string, @Body() data: ModulesDto) {
@@ -31,12 +37,13 @@ export class CourseController {
 
   @Post('class/:idCourse/:idModule')
   createClase(@Param('idCourse') course: string, @Param('idModule') module: string, @Body() data: ClassDto) {
-    return this.courseService.createClass("648bf89f7ef08f37aac0ab42", "1686896294272", data);
+    return this.courseService.createClass(course, module, data);
   }
 
+  @UseInterceptors(FileInterceptor('image'))
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCourseDto: CreateCourseDto) {
-    return this.courseService.update(id, updateCourseDto);
+  update(@UploadedFile() file, @Param('id') id: string, @Body() data) {
+    return this.courseService.updateCourse(id, JSON.parse(data.data));
   }
 
   @Patch('module/:idCourse/:idModule')
@@ -46,7 +53,7 @@ export class CourseController {
 
   @Patch('class/:idCourse/:idModule/:idClass')
   updateClass(@Param('idCourse') course: string, @Param('idModule') module: string, @Param('idClass') idClass: string, @Body() data: ClassDto) {
-    return this.courseService.updateClass("648bf89f7ef08f37aac0ab42", "1686896294272", idClass, data);
+    return this.courseService.updateClass(course, module, idClass, data);
   }
 
   @Delete('module/:idCourse/:idModule')
@@ -56,6 +63,6 @@ export class CourseController {
 
   @Delete('class/:idCourse/:idModule/:idClass')
   deleteClase(@Param('idCourse') course: string, @Param('idModule') module: string, @Param('idClass') idClass: string) {
-    return this.courseService.deleteClass("648bf89f7ef08f37aac0ab42", "1686896294272", idClass);
+    return this.courseService.deleteClass(course, module, idClass);
   }
 }
