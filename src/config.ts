@@ -19,6 +19,13 @@ export default registerAs('configuration', () => {
       key: process.env.ACCESS_KEY,
       secret: process.env.SECRET_ACCESS_KEY,
     },
+    redis: {
+      url: process.env.REDIS_URL,
+      host: process.env.REDISHOST,
+      password:process.env.REDISPASSWORD,
+      port: process.env.REDISPORT,
+      user: process.env.REDISUSER
+    },
     jwtSecret: process.env.JWT_SECRET,
     jwtSecretRecoverPassword: process.env.JWT_SECRET_RECOVER_PASSWORD,
   };
