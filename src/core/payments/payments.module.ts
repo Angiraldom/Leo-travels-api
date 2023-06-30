@@ -8,7 +8,7 @@ import { RedisService } from 'src/shared/service/redis.service';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: Payment.name, schema: PaymentSchema },
+      { name: Payment.name, schema: PaymentSchema }
     ]),
   ],
   controllers: [PaymentsController],
