@@ -19,6 +19,9 @@ export class Course extends Document {
   @Prop({ type: String })
   portada: string;
 
+  @Prop({ type: String })
+  namePortada: string;
+
   @Prop({ type: Array<ModulesDto> })
   modules: Array<ModulesDto>;
 

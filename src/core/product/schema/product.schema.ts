@@ -21,6 +21,9 @@ export class Product extends Document {
   @Prop({ type: Array<string> })
   images: Array<string>;
 
+  @Prop({ type: Array<{}> })
+  imageProperties: Array<{}>;
+
   @Prop({ type: Number })
   broad: number;
 

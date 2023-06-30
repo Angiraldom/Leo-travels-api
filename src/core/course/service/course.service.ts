@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { ConfigType } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 import { CreateCourseDto } from '../dto/create-course.dto';
 import { UploadImagesService } from 'src/shared/service/upload-images.service';
@@ -12,6 +13,7 @@ import { buildResponseSuccess } from 'src/shared/utils/utilities/Response.util';
 import { ModulesDto } from '../dto/moduls.dto';
 import { ClassDto } from '../dto/class.dto';
 import { Course } from '../schema/course.schema';
+import { IParamsIds } from '../interface/IParamsIds.interface';
 
 @Injectable()
 export class CourseService {
@@ -23,37 +25,53 @@ export class CourseService {
   ) {}
 
   async findAll() {
-    const course = await this.courseModel.find({});
+    const course = await this.courseModel.find();
 
     return buildResponseSuccess({
       data: course,
     });
   }
 
-  // async create(createCourseDto: CreateCourseDto, file) {
-  //   const entity = plainToInstance(CreateCourseDto, createCourseDto);
-  //   const errors = await validate(entity);
+  async findOneCourse(id: string) {
+    const mongoose = require('mongoose');
+    const validId = mongoose.Types.ObjectId.isValid(id);
 
-  //   if (errors.length > 0) {
-  //     throw new BadRequestException({
-  //       customMessage: errors,
-  //       tag: 'ErrorBadRequest',
-  //     });
-  //   }
+    if (!validId) {
+      return buildResponseSuccess({
+        data: null,
+      });
+    }
+    const course = await this.courseModel.findById(new ObjectId(id));
+    return buildResponseSuccess({
+      data: course,
+    });
+  }
 
-  //   const urlImage = await this.uploadImage(file);
+  async findClass(objectParams: IParamsIds) {
+    const mongoose = require('mongoose');
+    const validId = mongoose.Types.ObjectId.isValid(objectParams.idCourse);
 
-  //   createCourseDto['createdAt'] = new Date();
-  //   createCourseDto['portada'] = urlImage;
-  //   const newCourse = new this.courseModel(createCourseDto);
-  //   await newCourse.save();
+    if (!validId) {
+      return buildResponseSuccess({
+        data: null,
+      });
+    }
 
-  //   return buildResponseSuccess({
-  //     data: newCourse,
-  //   });
-  // }
+    const course = await this.courseModel.findById(
+      new ObjectId(objectParams.idCourse),
+    );
+    const module = course.modules?.find(
+      (module) => module._id === objectParams.idModule,
+    );
+    const objectClass = module?.classes?.find(
+      (item) => item._id === objectParams.idClass,
+    );
+    return buildResponseSuccess({
+      data: objectClass,
+    });
+  }
 
-  async create(createCourseDto: CreateCourseDto) {
+  async create(createCourseDto: CreateCourseDto, file) {
     const entity = plainToInstance(CreateCourseDto, createCourseDto);
     const errors = await validate(entity);
 
@@ -64,10 +82,11 @@ export class CourseService {
       });
     }
 
-    // const urlImage = await this.uploadImage(file);
-
+    const image = await this.uploadImage(file);
+    createCourseDto['portada'] = image.Location;
+    createCourseDto['namePortada'] = image.Key;
     createCourseDto['createdAt'] = new Date();
-    // createCourseDto['portada'] = urlImage;
+
     const newCourse = new this.courseModel(createCourseDto);
     await newCourse.save();
 
@@ -79,11 +98,10 @@ export class CourseService {
   async createModule(id: string, data: ModulesDto) {
     data['_id'] = new Date().getTime().toString();
     data['classes'] = [];
-    await this.courseModel.findByIdAndUpdate(id,
-    {
+    await this.courseModel.findByIdAndUpdate(id, {
       $push: {
-        modules: data
-      }
+        modules: data,
+      },
     });
 
     return buildResponseSuccess({
@@ -94,18 +112,18 @@ export class CourseService {
   async createClass(idCourse: string, idModule: string, data: ClassDto) {
     data['_id'] = new Date().getTime().toString();
     const course = await this.courseModel.findById(idCourse);
-    
+
     const module = course.modules.find((module) => module._id === idModule);
     module.classes.push(data);
-    course.markModified('modules'); 
-    course.markModified('classes'); 
+    course.markModified('modules');
+    course.markModified('classes');
     await course.save();
     return buildResponseSuccess({
       data: data,
     });
   }
 
-  async updateCourse(id: string, updateCourseDto: CreateCourseDto) {
+  async updateCourse(file, id: string, updateCourseDto: CreateCourseDto) {
     const entity = plainToInstance(CreateCourseDto, updateCourseDto);
     const errors = await validate(entity);
 
@@ -116,7 +134,15 @@ export class CourseService {
       });
     }
 
-    const newCourse = await this.courseModel.findByIdAndUpdate(id, updateCourseDto, { new: true });
+    const image = await this.uploadImage(file);
+    updateCourseDto['portada'] = image.Location;
+    updateCourseDto['namePortada'] = image.Key;
+
+    const newCourse = await this.courseModel.findByIdAndUpdate(
+      id,
+      updateCourseDto,
+      { new: true },
+    );
     return buildResponseSuccess({
       data: newCourse,
     });
@@ -124,10 +150,10 @@ export class CourseService {
 
   async updateModule(idCourse: string, idModule: string, data: ModulesDto) {
     const course = await this.courseModel.findById(idCourse);
-    
+
     course.modules = course.modules.map((module) => {
       if (module._id === idModule) {
-        module = {...module, ...data}
+        module = { ...module, ...data };
       }
       return module;
     });
@@ -138,17 +164,22 @@ export class CourseService {
     });
   }
 
-  async updateClass(idCourse: string, idModule: string, idClass: string, data: ClassDto) {
+  async updateClass(
+    idCourse: string,
+    idModule: string,
+    idClass: string,
+    data: ClassDto,
+  ) {
     const course = await this.courseModel.findById(idCourse);
-    
+
     const module = course.modules.find((module) => module._id === idModule);
     module.classes = module.classes.map((item) => {
       if (item._id === idClass) {
-        item = {...item, ...data}
+        item = { ...item, ...data };
       }
       return item;
     });
-    course.markModified('modules'); 
+    course.markModified('modules');
     course.markModified('classes');
     await course.save();
     return buildResponseSuccess({
@@ -158,9 +189,9 @@ export class CourseService {
 
   async deleteModule(idCourse: string, idModule: string) {
     const course = await this.courseModel.findById(idCourse);
-    
+
     course.modules = course.modules.filter((module) => module._id !== idModule);
-    course.markModified('modules'); 
+    course.markModified('modules');
     await course.save();
     return buildResponseSuccess({
       data: 'Eliminado exitosamente',
@@ -169,11 +200,11 @@ export class CourseService {
 
   async deleteClass(idCourse: string, idModule: string, idClass: string) {
     const course = await this.courseModel.findById(idCourse);
-    
+
     const module = course.modules.find((module) => module._id === idModule);
     module.classes = module.classes.filter((item) => item._id !== idClass);
-    course.markModified('modules'); 
-    course.markModified('classes'); 
+    course.markModified('modules');
+    course.markModified('classes');
     await course.save();
     return buildResponseSuccess({
       data: 'Eliminado exitosamente',
@@ -191,10 +222,10 @@ export class CourseService {
         .upload(uploadParams)
         .promise();
 
-      return result.Location;
+      return result;
     } catch (error) {
       console.log(error);
-      
+
       throw new InternalServerErrorException({
         customMessage:
           'Ocurrio un problema al momento de cargar las imagenes, vuelve a intentarlo',

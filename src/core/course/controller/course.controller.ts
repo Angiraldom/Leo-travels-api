@@ -5,7 +5,7 @@ import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ModulesDto } from '../dto/moduls.dto';
 import { ClassDto } from '../dto/class.dto';
-import { CreateCourseDto } from '../dto/create-course.dto';
+import { IParamsIds } from '../interface/IParamsIds.interface';
 
 @UseFilters(HttpExceptionFilter)
 // @UseGuards(JwtAuthGuard)
@@ -13,22 +13,26 @@ import { CreateCourseDto } from '../dto/create-course.dto';
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
-  @Get()
+  @Get('all-courses')
   findAll() {
     return this.courseService.findAll();
+  }
+
+  @Get('findOne/:id')
+  findOneCourse(@Param('id') id: string) {
+    return this.courseService.findOneCourse(id);
+  }
+
+  @Get('findClass/:idCourse/:idModule/:idClass')
+  findClass(@Param() objectParams: IParamsIds) {
+    return this.courseService.findClass(objectParams);
   }
 
   @Post()
   @UseInterceptors(FileInterceptor('image'))
   create(@UploadedFile() file, @Body() data) {
-    return this.courseService.create(JSON.parse(data.data));
+    return this.courseService.create(JSON.parse(data.data), file);
   }
-
-  // @Post()
-  // @UseInterceptors(FileInterceptor('image'))
-  // create(@UploadedFile() file, @Body() data) {
-  //   return this.courseService.create(JSON.parse(data.data), file);
-  // }
 
   @Post('module/:id')
   createModule(@Param('id') id: string, @Body() data: ModulesDto) {
@@ -43,7 +47,7 @@ export class CourseController {
   @UseInterceptors(FileInterceptor('image'))
   @Patch(':id')
   update(@UploadedFile() file, @Param('id') id: string, @Body() data) {
-    return this.courseService.updateCourse(id, JSON.parse(data.data));
+    return this.courseService.updateCourse(file, id, JSON.parse(data.data));
   }
 
   @Patch('module/:idCourse/:idModule')
