@@ -33,10 +33,16 @@ export class ProductService {
       });
     }
 
-    const urlsImages = await this.uploadImages(files);
+    const images = await this.uploadImages(files);
 
     createProductDto['createdAt'] = new Date();
-    createProductDto['images'] = urlsImages;
+    createProductDto['imageProperties'] = images.map((result) => { 
+      return {
+        key: result.Key, 
+        url: result.Location 
+      }
+    });
+  
     const newProduct = new this.productModel(createProductDto);
     await newProduct.save();
 
@@ -68,6 +74,18 @@ export class ProductService {
       });
     }
 
+    const images = await this.uploadImages(files);
+    const newImages = images.map((result) => { 
+      return {
+        key: result.Key, 
+        url: result.Location 
+      }
+    });
+    updateProductDto['imageProperties'] = [
+      ...updateProductDto['imageProperties'],
+      ...newImages,
+    ];
+
     await this.productModel.findByIdAndUpdate(id, { ...updateProductDto });
 
     return buildResponseSuccess({
@@ -89,9 +107,7 @@ export class ProductService {
 
       const results = await Promise.all(uploadPromises);
 
-      const imageUrls = results.map((result) => result.Location);
-
-      return imageUrls;
+      return results;
     } catch (error) {
       throw new InternalServerErrorException({
         customMessage:
