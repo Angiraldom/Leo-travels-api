@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus, HttpCode } from '@nestjs/common';
 
 import { PaymentsService } from '../service/payments.service';
-import { CreatePaymentDto } from '../dto/create-payment.dto';
 import { RedisService } from 'src/shared/service/redis.service';
+import { IWompi } from '../interface/IResponseWompi.interface';
 
 @Controller('payments')
 export class PaymentsController {
@@ -10,18 +10,13 @@ export class PaymentsController {
     private readonly paymentsService: PaymentsService,
     private redisService: RedisService) {}
 
-  @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentsService.create(createPaymentDto);
-  }
-
   @Post('notification')
-  wompiNotification(@Body() data: any) {
-    console.log(data);
-    return new HttpException({}, HttpStatus.OK);
+  @HttpCode(200)
+  wompiNotification(@Body() data: IWompi) {
+   return this.paymentsService.validateWompi(data);
   }
 
-  @Get()
+  @Get('getPayments')
   findAll() {
     return this.paymentsService.findAll();
   }

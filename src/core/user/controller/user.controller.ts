@@ -12,7 +12,7 @@ import {
 import { Response, Request } from 'express';
 
 import { UserService } from '../service/user.service';
-import { AddUserDto, DeleteUserDto, UpdateUserDto } from '../dto';
+import { UpdateUserDto } from '../dto';
 import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
@@ -38,20 +38,7 @@ export class UserController {
     }
   }
 
-  /**
-   * Controller of the method addUser.
-   */
-  @Post('add')
-  async addUser(@Body() user: AddUserDto, @Res() res: Response) {
-    try {
-      const RESPONSE = await this.userService.addUser(user);
-      return res.status(RESPONSE['code']).json(RESPONSE);
-    } catch (error) {
-      console.log('Error método: addUser');
-      return res.status(400).json(error);
-    }
-  }
-
+  
   /**
    * Controller of the method updateUser.
    */
@@ -59,20 +46,6 @@ export class UserController {
   async updateUser(@Body() userToUpdate: UpdateUserDto, @Res() res: Response) {
     try {
       const RESPONSE = await this.userService.updateUser(userToUpdate);
-      return res.status(RESPONSE['code']).json(RESPONSE);
-    } catch (error) {
-      console.log('Error método: updateUser');
-      return res.status(400).json(error);
-    }
-  }
-
-  /**
-   * Controller of the method deleteUSer.
-   */
-  @Post('delete')
-  async deleteUSer(@Body() userToDelete: DeleteUserDto, @Res() res: Response) {
-    try {
-      const RESPONSE = await this.userService.deleteUser(userToDelete);
       return res.status(RESPONSE['code']).json(RESPONSE);
     } catch (error) {
       console.log('Error método: updateUser');

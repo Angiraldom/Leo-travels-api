@@ -1,0 +1,25 @@
+<html>
+
+<h2> Confirmación de compra </h2>
+<p> Hola {{name}}, esta es la confirmación de tu compra con los respectivos productos </p>
+<ul class="product_list">
+  {{#each products}}
+  <li style="color: blue;">{{title}}
+    <p>
+      <br>
+      <b>
+        Precio : {{price}}
+
+      </b>
+      <br>
+      <b>
+        descripción: {{description}}
+
+      </b>
+    </p>
+  </li>
+
+  {{/each}}
+</ul>
+
+</html>

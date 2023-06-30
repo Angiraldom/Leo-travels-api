@@ -101,4 +101,14 @@ export class RedisService {
       console.error(`Error updating data for reference ${reference}: ${error}`);
     }
   }
+
+  async deleteRedisReference(reference: string){
+    try{
+      const CART_KEY = `cart:${reference}`;
+
+      await this.client.del(CART_KEY);
+    }catch (error ) {
+      console.error(`Error updating data for reference ${reference}: ${error}`);
+    }
+  }
 }
