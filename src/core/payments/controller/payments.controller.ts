@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
 
 import { PaymentsService } from '../service/payments.service';
 import { CreatePaymentDto } from '../dto/create-payment.dto';
@@ -13,6 +13,12 @@ export class PaymentsController {
   @Post()
   create(@Body() createPaymentDto: CreatePaymentDto) {
     return this.paymentsService.create(createPaymentDto);
+  }
+
+  @Post('notification')
+  wompiNotification(@Body() data: any) {
+    console.log(data);
+    return new HttpException({}, HttpStatus.OK);
   }
 
   @Get()
