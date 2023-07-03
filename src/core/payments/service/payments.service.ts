@@ -1,7 +1,8 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { response } from 'express';
+import { ConfigType } from '@nestjs/config';
 
 import { Payment } from '../schema/payment.schema';
 import { RedisService } from 'src/shared/service/redis.service';
@@ -13,10 +14,12 @@ import { IWompi } from '../interface/IResponseWompi.interface';
 import { IRedisResponse } from 'src/core/product/interface/IRedisResponse.interface';
 import { IProduct } from 'src/core/product/interface/IProduct.interface';
 import { IUser } from 'src/core/user/interface/IUser.interface';
+import configuration from '../../../config';
 
 @Injectable()
 export class PaymentsService {
   constructor(@InjectModel(Payment.name) private readonly invoiceModel: Model<Payment>,
+  @Inject(configuration.KEY) private config: ConfigType<typeof configuration>,
     private redisService: RedisService,
     private userService: UserService,
     private emailService: EmailService) { }
@@ -95,14 +98,13 @@ export class PaymentsService {
         }
         const addNewUser = await this.userService.addUser(newUser)
         if (addNewUser.data) {
-          await this.sendMailNewUser(newUser.email, newUser.password);
-          await this.sendMailProducts(data);
-        }
+          await this.sendMailProducts(data, newUser.password);
+      }
         return response.status(201);
       }
-
+      
     }
-    await this.sendMailProducts(data);
+    await this.sendMailProductsIndependent(data);
     await this.create(data);
     this.redisService.deleteRedisReference(data.data.transaction.reference);
   }
@@ -122,8 +124,15 @@ export class PaymentsService {
 
     return pass;
   }
+  getTotalValue(products: any[]) {
+    const total: number = products.reduce((value, item) => {
+      const price = item.price * item.amount;
+      return value = price + value;
+    }, 0)
+    return total;
+  }
 
-  async sendMailProducts(dataTransaction: IWompi) {
+  async sendMailProducts(dataTransaction: IWompi, passwordUser?: string) {
     const user = await this.userService.findUserByEmail(dataTransaction.data.transaction.customer_email);
     if (!user) {
       throw new NotFoundException({
@@ -133,7 +142,11 @@ export class PaymentsService {
     }
     const data = {
       ...user,
-      products: [...dataTransaction.products]
+      urlLogin : this.config.urlLogin,
+      products: [...dataTransaction.products],
+      password: passwordUser,
+      total: this.getTotalValue(dataTransaction.products),
+      transaction: dataTransaction.data
     };
 
     const configEmail = {
@@ -151,8 +164,8 @@ export class PaymentsService {
     });
   }
 
-  async sendMailNewUser(email: string, password: string) {
-    const user = await this.userService.findUserByEmail(email);
+  async sendMailProductsIndependent(dataTransaction: IWompi) {
+    const user = await this.userService.findUserByEmail(dataTransaction.data.transaction.customer_email);
     if (!user) {
       throw new NotFoundException({
         customMessage: 'El email no existe',
@@ -161,21 +174,20 @@ export class PaymentsService {
     }
     const data = {
       ...user,
-      credentials: {
-        emailUser: email,
-        passUser: password
-      }
+      products: [...dataTransaction.products],
+      total: this.getTotalValue(dataTransaction.products),
+      transaction: dataTransaction.data
     };
 
     const configEmail = {
-      subject: 'Registro nuevo usuario',
+      subject: 'Confirmación compra de productos',
       from: 'Email test',
       to: data.email,
     };
     const res = await this.emailService.sendMail(
       configEmail,
       data,
-      'new-user-email-pass',
+      'confirm-buy-products',
     );
     return buildResponseSuccess({
       data: res ?? 'The mail was send successfully',

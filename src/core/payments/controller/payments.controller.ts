@@ -21,11 +21,6 @@ export class PaymentsController {
     return this.paymentsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentsService.findOne(+id);
-  }
-
   @Post('saveProduct')
   saveProduct(@Body() body: {reference: string; product: {}}) {
     return this.redisService.saveData(body);
