@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   Res,
@@ -17,6 +18,7 @@ import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { Public } from 'src/core/auth/decorators/public.decorator';
+
 
 @UseFilters(HttpExceptionFilter)
 @UseGuards(JwtAuthGuard)
@@ -72,11 +74,20 @@ export class UserController {
   }
 
   /**
-   * Controller of the method change password.
+   * Controller of the method recovery password.
    */
   @Public()
-  @Post('change-password')
-  async changePassword(@Body() body: { password: string; token: string }) {
-    return this.userService.changePassword(body.password, body.token);
+  @Post('recovery-password')
+  async recoveryPassword(@Body() body: { password: string; token: string }) {
+    return this.userService.recoveryPassword(body.password, body.token);
   }
+
+    /**
+   * Controller of the method change password.
+   */
+    @Public()
+    @Post('change-password/:id')
+    async changePassword(@Body() body: { actualPassword: string; newPassword: string }, @Param("id") id: string) {
+      return this.userService.changePassword(body.actualPassword, body.newPassword, id);
+    }
 }

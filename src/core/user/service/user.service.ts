@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Inject,
@@ -15,7 +16,7 @@ import { IRequestResponse } from './../../../shared/utils/interface/IRequestResp
 import { AddUserDto, UpdateUserDto } from '../dto';
 import { validateAction } from '../../../shared/function/validateAction.function';
 import { buildResponseSuccess } from '../../../shared/utils/utilities/Response.util';
-import { encrypt } from '../../../shared/function/encryptPassword.function';
+import { comparePassword, encrypt } from '../../../shared/function/encryptPassword.function';
 import { REQUIRED_PROPERTIES } from '../constant/fieldsValidation.constant';
 import { EmailService } from 'src/shared/service/email.service';
 import configuration from '../../../config';
@@ -28,7 +29,7 @@ export class UserService {
     @InjectModel('Users') private readonly userModel: Model<IUser>,
     private emailService: EmailService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   /**
    * Method responsible for obtaining all users.
@@ -155,8 +156,7 @@ export class UserService {
       ...user,
       link: `http://localhost:4200/change-password?token=${token}`,
     };
-    console.log(data);
-    
+
     const configEmail = {
       subject: 'Cambio de contraseña',
       from: 'Email test',
@@ -186,7 +186,7 @@ export class UserService {
     return token;
   }
 
-  async changePassword(password: string, token: string) {
+  async recoveryPassword(password: string, token: string) {
     const payload: IPayloadToken = this.jwtService.verify(token, {
       secret: this.config.jwtSecretRecoverPassword,
     });
@@ -198,6 +198,30 @@ export class UserService {
 
     return buildResponseSuccess({
       data: userUpdate ?? 'The password was change succesful',
+    });
+  }
+
+  async changePassword(actualPassword: string, newPassword: string, id: string) {
+    const userBd = await this.userModel.findById(id);
+    if (userBd && actualPassword) {
+      const confirmPassword = await comparePassword(actualPassword, userBd.password);
+      if (!confirmPassword) {
+
+        throw new BadRequestException({
+          customMessage: "The current password does not match ",
+          tag: 'ErrorPasswordNotMatch',
+        });
+      }
+      await this.userModel.findByIdAndUpdate(id, {
+        password: await encrypt(newPassword)
+      });
+      return buildResponseSuccess({
+        data: 'The password was change succesful'
+      });
+    }
+    throw new BadRequestException({
+      customMessage: "User id and actual password is required",
+      tag: 'ErrorFieldRequired',
     });
   }
 }
