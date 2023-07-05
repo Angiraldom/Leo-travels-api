@@ -12,7 +12,7 @@ import { ConfigType } from '@nestjs/config';
 
 import { IUser } from '../interface/IUser.interface';
 import { IRequestResponse } from './../../../shared/utils/interface/IRequestResponse.interface';
-import { AddUserDto, DeleteUserDto, UpdateUserDto } from '../dto';
+import { AddUserDto, UpdateUserDto } from '../dto';
 import { validateAction } from '../../../shared/function/validateAction.function';
 import { buildResponseSuccess } from '../../../shared/utils/utilities/Response.util';
 import { encrypt } from '../../../shared/function/encryptPassword.function';
@@ -45,7 +45,7 @@ export class UserService {
    * @param {AddUserDto} user - Information user.
    * @returns {Promise<IRequestResponse>} - Response method.
    */
-  async addUser(user: AddUserDto): Promise<IRequestResponse> {
+  async addUser(user: IUser): Promise<IRequestResponse> {
     //Validate user by identification.
     const EXIST_USER = await this.findUser({
       numberDocument: user.numberDocument,
@@ -97,33 +97,6 @@ export class UserService {
     await this.userModel.findByIdAndUpdate(userToUpdate._id, userToUpdate, {
       new: true,
     });
-
-    return buildResponseSuccess({
-      data: true,
-    });
-  }
-
-  /**
-   * Method responsible for delete a user.
-   * @param {DeleteUserDto} userToDelete - User information to delete.
-   * @returns {Promise<IRequestResponse>} - Response method.
-   */
-  async deleteUser(userToDelete: DeleteUserDto): Promise<IRequestResponse> {
-    const { _id } = userToDelete;
-
-    //validate user by _id.
-    const EXIST_USER = await this.findUser({
-      _id,
-    });
-
-    await validateAction(
-      true,
-      EXIST_USER?._id === undefined,
-      'The user does not exist.',
-    );
-
-    //Delete user.
-    await this.userModel.findByIdAndDelete(_id);
 
     return buildResponseSuccess({
       data: true,

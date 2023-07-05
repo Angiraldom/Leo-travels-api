@@ -19,8 +19,8 @@ export class EmailService {
     //   host: 'smtp.ethereal.email',
     //   port: 587,
     //   auth: {
-    //     user: 'theo.eichmann@ethereal.email',
-    //     pass: 'TQsc76J7pHMRXddNEa'
+    //     user: 'kaylie.beer@ethereal.email',
+    //     pass: 'PwEDU5SE1ZHSY3V7q4'
     //   },
     // });
     // return transporter;
@@ -36,17 +36,18 @@ export class EmailService {
     });
     return transporter;
   }
-
+  
   async sendMail(
     configMail: Mail.Options,
     data: unknown,
     templateName: string,
-  ) {
-    const transporter = this.createTransporter();
-    const emailTemplate = await this.compile(templateName, data);
-    const responseEmail = await transporter.sendMail({
-      ...configMail,
-      html: emailTemplate,
+    ) {
+      const transporter = this.createTransporter();
+      this.parseIntToCurrency();
+      const emailTemplate = await this.compile(templateName, data);
+      const responseEmail = await transporter.sendMail({
+        ...configMail,
+        html: emailTemplate,
     });
     return responseEmail;
   }
@@ -59,5 +60,17 @@ export class EmailService {
     );
     const html = await fs.readFile(filePath, 'utf8');
     return hbs.compile(html, { strict: false })(data);
+  }
+
+  parseIntToCurrency(){
+    
+  hbs.registerHelper("parseCurrency",(price) => {
+
+    let COP = new Intl.NumberFormat('en-US', {
+        currency: 'COP',
+        style: 'currency',
+      }).format(price);
+      return COP;
+  })
   }
 }

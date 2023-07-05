@@ -1,29 +1,24 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Document } from 'mongoose';
-
-import { ShippingAddress } from "./ShippingAddress.schema";
-import { CustomerData } from "./customerData.schema";
+import { IProduct } from "src/core/product/interface/IProduct.interface";
+import { Data, Signature } from "./wompi.schema";
 
 @Schema()
 export class Payment extends Document {
-
     @Prop()
-    currency: string;
-
+    data?: Data;
     @Prop()
-    amountInCents: number;
-
+    event?: string;
     @Prop()
-    reference: number;
-
+    sent_at?: Date;
     @Prop()
-    redirectUrl: string;
-    
+    signature?: Signature;
     @Prop()
-    customerData: CustomerData;
-
+    timestamp?: number;
     @Prop()
-    shippingAddress: ShippingAddress;
+    environment?: string;
+    @Prop()
+    products: IProduct[]
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);
