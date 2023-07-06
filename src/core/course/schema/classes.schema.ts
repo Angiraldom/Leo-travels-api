@@ -7,4 +7,7 @@ export class Classes extends Document {
 
   @Prop({ type: URL })
   url: string;
+
+  @Prop({ type: Boolean, default: false })
+  completed: boolean;
 }

@@ -4,7 +4,7 @@ import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ModulesDto } from '../dto/moduls.dto';
-import { ClassDto } from '../dto/class.dto';
+import { ClassDto, UpdateClassDto } from '../dto/class.dto';
 import { IParamsIds } from '../interface/IParamsIds.interface';
 
 @UseFilters(HttpExceptionFilter)
@@ -58,6 +58,12 @@ export class CourseController {
   @Patch('class/:idCourse/:idModule/:idClass')
   updateClass(@Param('idCourse') course: string, @Param('idModule') module: string, @Param('idClass') idClass: string, @Body() data: ClassDto) {
     return this.courseService.updateClass(course, module, idClass, data);
+  }
+
+  @Patch('completedClass/:idCourse/:idModule/:idClass')
+  completedClass(@Param('idCourse') course: string, @Param('idModule') module: string, @Param('idClass') idClass: string, @Body() data: UpdateClassDto) {
+    const body: any = data;
+    return this.courseService.updateClass(course, module, idClass, body);
   }
 
   @Delete('module/:idCourse/:idModule')
