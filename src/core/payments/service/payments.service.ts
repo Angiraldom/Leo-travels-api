@@ -31,7 +31,7 @@ export class PaymentsService {
 
   async findAll(): Promise<IRequestResponse> {
     return buildResponseSuccess({
-      data: await this.invoiceModel.find({}, { password: 0 }).sort({ name: 1 }),
+      data: await this.invoiceModel.find(),
     });
   }
 
@@ -40,50 +40,11 @@ export class PaymentsService {
     if (data.data.transaction.status != "APPROVED") {
       return response.status(HttpStatus.OK);
     }
-    // PARSEAR A JSON LA RESPUESTA DE REDIS
-    //var productsRedis = await this.redisService.getData("qhTlYql1Mk-ljhhiduo");
-    const redisResponse: IRedisResponse = {
-      reference: 'qhTlYql1Mk-ljhhiduo',
-      products: [
-        {
-          id: 264,
-          title: 'asd',
-          price: 12312,
-          description: 'asdasda',
-          images: [Array],
-          creationAt: '2023-06-29T17:08:43.000Z',
-          updatedAt: '2023-06-29T17:08:43.000Z',
-          category: [Object],
-          amount: 1
-        },
-        {
-          id: 263,
-          title: 'string21121asdasasdsa',
-          price: 2,
-          description: 'string',
-          images: [Array],
-          creationAt: '2023-06-29T17:06:14.000Z',
-          updatedAt: '2023-06-29T18:11:37.000Z',
-          category: [Object],
-          amount: 1,
-          modules: []
-        },
-        {
-          id: 265,
-          title: 'adssa',
-          price: 12,
-          description: 'dasdas',
-          images: [Array],
-          creationAt: '2023-06-29T17:09:33.000Z',
-          updatedAt: '2023-06-29T17:09:33.000Z',
-          category: [Object],
-          amount: 2
-        }
-      ]
-    }
-    data.products = redisResponse.products
+    const productsRedis = await this.redisService.getData(data.data.transaction.reference);
 
-    const hasModules = this.validateRedisProduct(redisResponse.products)
+    data.products = JSON.parse(productsRedis);
+
+    const hasModules = this.validateRedisProduct(data.products)
     if (hasModules) {
       const hasUser = await this.userService.findUserByEmail(data.data.transaction.customer_email)
       if (!hasUser) {
