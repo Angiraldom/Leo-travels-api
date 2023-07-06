@@ -18,6 +18,7 @@ import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { Public } from 'src/core/auth/decorators/public.decorator';
+import { IUser } from '../interface/IUser.interface';
 
 
 @UseFilters(HttpExceptionFilter)
@@ -38,6 +39,11 @@ export class UserController {
       console.log('Error método: getAllUsers');
       return res.status(400).json(error);
     }
+  }
+
+  @Post('add')
+  async addUser(@Body() user: IUser){
+    return this.userService.addUser(user);
   }
 
   
