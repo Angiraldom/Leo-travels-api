@@ -18,6 +18,7 @@ import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { Public } from 'src/core/auth/decorators/public.decorator';
+import { IUser } from '../interface/IUser.interface';
 
 
 @UseFilters(HttpExceptionFilter)
@@ -48,6 +49,11 @@ export class UserController {
   @Post('findByEmail')
   getInvoiceByEmail(@Body() data: { email: string }) {
    return this.userService.findByEmail(data.email);
+  }
+
+  @Post('add')
+  async addUser(@Body() user: IUser){
+    return this.userService.addUser(user);
   }
   
   /**
