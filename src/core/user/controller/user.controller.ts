@@ -39,6 +39,11 @@ export class UserController {
     }
   }
 
+  /**
+   * Filter user by email.
+   * @param data Email to search.
+   * @returns The user.
+   */
   @Public()
   @Post('findByEmail')
   getInvoiceByEmail(@Body() data: { email: string }) {
