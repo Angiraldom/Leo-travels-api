@@ -224,4 +224,17 @@ export class UserService {
       tag: 'ErrorFieldRequired',
     });
   }
+
+  /**
+   Filter user by email.
+   * @param email Email to search.
+   * @returns The user.
+   */
+  async findByEmail(email: string): Promise<IRequestResponse> {
+    return buildResponseSuccess({
+      data: await this.userModel.findOne({
+        email
+      }, { password: 0 })
+    });
+  }
 }

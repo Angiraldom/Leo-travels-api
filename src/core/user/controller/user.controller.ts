@@ -36,16 +36,25 @@ export class UserController {
       const RESPONSE = await this.userService.getAllUsers();
       return res.status(RESPONSE['code']).json(RESPONSE);
     } catch (error) {
-      console.log('Error método: getAllUsers');
       return res.status(400).json(error);
     }
+  }
+
+  /**
+   * Filter user by email.
+   * @param data Email to search.
+   * @returns The user.
+   */
+  @Public()
+  @Post('findByEmail')
+  getInvoiceByEmail(@Body() data: { email: string }) {
+   return this.userService.findByEmail(data.email);
   }
 
   @Post('add')
   async addUser(@Body() user: IUser){
     return this.userService.addUser(user);
   }
-
   
   /**
    * Controller of the method updateUser.
@@ -56,7 +65,6 @@ export class UserController {
       const RESPONSE = await this.userService.updateUser(userToUpdate);
       return res.status(RESPONSE['code']).json(RESPONSE);
     } catch (error) {
-      console.log('Error método: updateUser');
       return res.status(400).json(error);
     }
   }
@@ -91,7 +99,6 @@ export class UserController {
     /**
    * Controller of the method change password.
    */
-    @Public()
     @Post('change-password/:id')
     async changePassword(@Body() body: { actualPassword: string; newPassword: string }, @Param("id") id: string) {
       return this.userService.changePassword(body.actualPassword, body.newPassword, id);
