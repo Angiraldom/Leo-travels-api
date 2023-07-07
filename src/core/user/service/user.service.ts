@@ -224,4 +224,12 @@ export class UserService {
       tag: 'ErrorFieldRequired',
     });
   }
+
+  async findByEmail(email: string): Promise<IRequestResponse> {
+    return buildResponseSuccess({
+      data: await this.userModel.findOne({
+        email
+      }, { password: 0 })
+    });
+  }
 }
