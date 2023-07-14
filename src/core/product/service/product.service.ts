@@ -59,8 +59,11 @@ export class ProductService {
     });
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    const product = await this.productModel.findById(id);
+    return buildResponseSuccess({
+      data: product,
+    });
   }
 
   async update(id: string, updateProductDto: UpdateProductDto, files) {

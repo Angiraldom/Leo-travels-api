@@ -100,7 +100,7 @@ export class UserService {
     });
 
     return buildResponseSuccess({
-      data: true,
+      data: userToUpdate,
     });
   }
 
@@ -189,6 +189,7 @@ export class UserService {
   async recoveryPassword(password: string, token: string) {
     const payload: IPayloadToken = this.jwtService.verify(token, {
       secret: this.config.jwtSecretRecoverPassword,
+      ignoreExpiration: false
     });
     const hasPassword = await encrypt(password);
     const userUpdate = await this.userModel.findByIdAndUpdate(payload.sub, {

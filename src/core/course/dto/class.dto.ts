@@ -16,6 +16,10 @@ export class ClassDto {
   @IsString({ message: 'It must be of string type (description).' })
   @IsOptional()
   description: string;
+
+  @IsString({ message: 'It must be of string type (duration).' })
+  @IsOptional()
+  duration: string;
 }
 
 export class UpdateClassDto {

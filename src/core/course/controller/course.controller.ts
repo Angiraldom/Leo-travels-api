@@ -6,9 +6,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ModulesDto } from '../dto/moduls.dto';
 import { ClassDto, UpdateClassDto } from '../dto/class.dto';
 import { IParamsIds } from '../interface/IParamsIds.interface';
+import { Public } from 'src/core/auth/decorators/public.decorator';
 
 @UseFilters(HttpExceptionFilter)
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
@@ -21,6 +22,12 @@ export class CourseController {
   @Get('findOne/:id')
   findOneCourse(@Param('id') id: string) {
     return this.courseService.findOneCourse(id);
+  }
+
+  @Public()
+  @Get('getCourse/:id')
+  getCourse(@Param('id') id: string) {
+    return this.courseService.getCourse(id);
   }
 
   @Get('findClass/:idCourse/:idModule/:idClass')
