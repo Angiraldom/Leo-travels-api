@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Inject,
@@ -12,10 +13,10 @@ import { ConfigType } from '@nestjs/config';
 
 import { IUser } from '../interface/IUser.interface';
 import { IRequestResponse } from './../../../shared/utils/interface/IRequestResponse.interface';
-import { AddUserDto, DeleteUserDto, UpdateUserDto } from '../dto';
+import { AddUserDto, UpdateUserDto } from '../dto';
 import { validateAction } from '../../../shared/function/validateAction.function';
 import { buildResponseSuccess } from '../../../shared/utils/utilities/Response.util';
-import { encrypt } from '../../../shared/function/encryptPassword.function';
+import { comparePassword, encrypt } from '../../../shared/function/encryptPassword.function';
 import { REQUIRED_PROPERTIES } from '../constant/fieldsValidation.constant';
 import { EmailService } from 'src/shared/service/email.service';
 import configuration from '../../../config';
@@ -28,7 +29,7 @@ export class UserService {
     @InjectModel('Users') private readonly userModel: Model<IUser>,
     private emailService: EmailService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   /**
    * Method responsible for obtaining all users.
@@ -45,7 +46,7 @@ export class UserService {
    * @param {AddUserDto} user - Information user.
    * @returns {Promise<IRequestResponse>} - Response method.
    */
-  async addUser(user: AddUserDto): Promise<IRequestResponse> {
+  async addUser(user: IUser): Promise<IRequestResponse> {
     //Validate user by identification.
     const EXIST_USER = await this.findUser({
       numberDocument: user.numberDocument,
@@ -99,34 +100,7 @@ export class UserService {
     });
 
     return buildResponseSuccess({
-      data: true,
-    });
-  }
-
-  /**
-   * Method responsible for delete a user.
-   * @param {DeleteUserDto} userToDelete - User information to delete.
-   * @returns {Promise<IRequestResponse>} - Response method.
-   */
-  async deleteUser(userToDelete: DeleteUserDto): Promise<IRequestResponse> {
-    const { _id } = userToDelete;
-
-    //validate user by _id.
-    const EXIST_USER = await this.findUser({
-      _id,
-    });
-
-    await validateAction(
-      true,
-      EXIST_USER?._id === undefined,
-      'The user does not exist.',
-    );
-
-    //Delete user.
-    await this.userModel.findByIdAndDelete(_id);
-
-    return buildResponseSuccess({
-      data: true,
+      data: userToUpdate,
     });
   }
 
@@ -182,8 +156,7 @@ export class UserService {
       ...user,
       link: `http://localhost:4200/change-password?token=${token}`,
     };
-    console.log(data);
-    
+
     const configEmail = {
       subject: 'Cambio de contraseña',
       from: 'Email test',
@@ -213,9 +186,10 @@ export class UserService {
     return token;
   }
 
-  async changePassword(password: string, token: string) {
+  async recoveryPassword(password: string, token: string) {
     const payload: IPayloadToken = this.jwtService.verify(token, {
       secret: this.config.jwtSecretRecoverPassword,
+      ignoreExpiration: false
     });
     const hasPassword = await encrypt(password);
     const userUpdate = await this.userModel.findByIdAndUpdate(payload.sub, {
@@ -225,6 +199,43 @@ export class UserService {
 
     return buildResponseSuccess({
       data: userUpdate ?? 'The password was change succesful',
+    });
+  }
+
+  async changePassword(actualPassword: string, newPassword: string, id: string) {
+    const userBd = await this.userModel.findById(id);
+    if (userBd && actualPassword) {
+      const confirmPassword = await comparePassword(actualPassword, userBd.password);
+      if (!confirmPassword) {
+
+        throw new BadRequestException({
+          customMessage: "The current password does not match ",
+          tag: 'ErrorPasswordNotMatch',
+        });
+      }
+      await this.userModel.findByIdAndUpdate(id, {
+        password: await encrypt(newPassword)
+      });
+      return buildResponseSuccess({
+        data: 'The password was change succesful'
+      });
+    }
+    throw new BadRequestException({
+      customMessage: "User id and actual password is required",
+      tag: 'ErrorFieldRequired',
+    });
+  }
+
+  /**
+   Filter user by email.
+   * @param email Email to search.
+   * @returns The user.
+   */
+  async findByEmail(email: string): Promise<IRequestResponse> {
+    return buildResponseSuccess({
+      data: await this.userModel.findOne({
+        email
+      }, { password: 0 })
     });
   }
 }

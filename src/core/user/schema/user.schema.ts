@@ -37,7 +37,7 @@ export class User extends Document {
   @Prop({ type: Number })
   phone: number;
 
-  @Prop({ type: Boolean })
+  @Prop({ type: Boolean, default: true })
   status: boolean;
 }
 

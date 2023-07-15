@@ -47,6 +47,23 @@ export class CourseService {
     });
   }
 
+  async getCourse(id: string) {
+    const mongoose = require('mongoose');
+    const validId = mongoose.Types.ObjectId.isValid(id);
+
+    if (!validId) {
+      return buildResponseSuccess({
+        data: null,
+      });
+    }
+    const course = await this.courseModel.findById(new ObjectId(id), { modules: 0 });
+    course['modules'] = [];
+    
+    return buildResponseSuccess({
+      data: course,
+    });
+  }
+
   async findClass(objectParams: IParamsIds) {
     const mongoose = require('mongoose');
     const validId = mongoose.Types.ObjectId.isValid(objectParams.idCourse);
@@ -67,7 +84,10 @@ export class CourseService {
       (item) => item._id === objectParams.idClass,
     );
     return buildResponseSuccess({
-      data: objectClass,
+      data: {
+        class: objectClass,
+        nameModule: module.name
+      },
     });
   }
 

@@ -4,11 +4,12 @@ import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ModulesDto } from '../dto/moduls.dto';
-import { ClassDto } from '../dto/class.dto';
+import { ClassDto, UpdateClassDto } from '../dto/class.dto';
 import { IParamsIds } from '../interface/IParamsIds.interface';
+import { Public } from 'src/core/auth/decorators/public.decorator';
 
 @UseFilters(HttpExceptionFilter)
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
@@ -21,6 +22,12 @@ export class CourseController {
   @Get('findOne/:id')
   findOneCourse(@Param('id') id: string) {
     return this.courseService.findOneCourse(id);
+  }
+
+  @Public()
+  @Get('getCourse/:id')
+  getCourse(@Param('id') id: string) {
+    return this.courseService.getCourse(id);
   }
 
   @Get('findClass/:idCourse/:idModule/:idClass')
@@ -58,6 +65,12 @@ export class CourseController {
   @Patch('class/:idCourse/:idModule/:idClass')
   updateClass(@Param('idCourse') course: string, @Param('idModule') module: string, @Param('idClass') idClass: string, @Body() data: ClassDto) {
     return this.courseService.updateClass(course, module, idClass, data);
+  }
+
+  @Patch('completedClass/:idCourse/:idModule/:idClass')
+  completedClass(@Param('idCourse') course: string, @Param('idModule') module: string, @Param('idClass') idClass: string, @Body() data: UpdateClassDto) {
+    const body: any = data;
+    return this.courseService.updateClass(course, module, idClass, body);
   }
 
   @Delete('module/:idCourse/:idModule')

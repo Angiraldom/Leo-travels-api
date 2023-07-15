@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
-
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
 import { Redis } from 'ioredis';
+
+import configuration from '../../config';
 
 @Injectable()
 export class RedisService {
@@ -9,8 +11,14 @@ export class RedisService {
   /**
    * Establish that the information will be awaited in dependence 0.
    */
-  constructor() {
-    this.client = new Redis({ db: 0 });
+  constructor(
+    @Inject(configuration.KEY) private config: ConfigType<typeof configuration>,
+  ) {
+    this.client = new Redis({
+      host: this.config.redis.host,
+      port: Number(this.config.redis.port),
+      password: this.config.redis.password,
+    });
   }
 
   /**
@@ -44,7 +52,7 @@ export class RedisService {
    * @param {string} referenceWompi - Reference wompi.
    * @param {any} data - Information to save.
    */
-  async saveData(body: {reference: string; product: {}}) {
+  async saveData(body: { reference: string; product: {} }) {
     try {
       const CART_KEY = `cart:${body.reference}`;
 
@@ -58,13 +66,12 @@ export class RedisService {
       } else {
         const obj = {
           reference: body.reference,
-          products: [body.product]
+          products: [body.product],
         };
         await this.client.set(CART_KEY, JSON.stringify(obj), 'EX', 3600);
       }
 
       return await this.getData(body.reference);
-      
     } catch (error) {
       console.error(
         `Error save data for reference ${body.reference}: ${error}`,
@@ -79,23 +86,29 @@ export class RedisService {
    */
   async updateAllProducts(reference: string, products: []) {
     try {
-
       const CART_KEY = `cart:${reference}`;
 
       await this.client.del(CART_KEY);
 
       const obj = {
         reference,
-        products
+        products,
       };
       await this.client.set(CART_KEY, JSON.stringify(obj), 'EX', 3600);
-    
+
       return await this.getData(reference);
-      
     } catch (error) {
-      console.error(
-        `Error updating data for reference ${reference}: ${error}`,
-      );
+      console.error(`Error updating data for reference ${reference}: ${error}`);
+    }
+  }
+
+  async deleteRedisReference(reference: string){
+    try{
+      const CART_KEY = `cart:${reference}`;
+
+      await this.client.del(CART_KEY);
+    }catch (error ) {
+      console.error(`Error updating data for reference ${reference}: ${error}`);
     }
   }
 }

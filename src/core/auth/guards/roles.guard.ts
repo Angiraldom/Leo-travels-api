@@ -1,8 +1,8 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
@@ -27,7 +27,7 @@ export class RolesGuard implements CanActivate {
 
     const isAuth = roles.some((role) => role === user.role);
     if (!isAuth) {
-      throw new UnauthorizedException('your role is wrong');
+      throw new ForbiddenException('your role is wrong');
     }
     return isAuth;
   }

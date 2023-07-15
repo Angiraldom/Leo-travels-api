@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   Res,
@@ -12,11 +13,13 @@ import {
 import { Response, Request } from 'express';
 
 import { UserService } from '../service/user.service';
-import { AddUserDto, DeleteUserDto, UpdateUserDto } from '../dto';
+import { UpdateUserDto } from '../dto';
 import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { Public } from 'src/core/auth/decorators/public.decorator';
+import { IUser } from '../interface/IUser.interface';
+
 
 @UseFilters(HttpExceptionFilter)
 @UseGuards(JwtAuthGuard)
@@ -33,25 +36,26 @@ export class UserController {
       const RESPONSE = await this.userService.getAllUsers();
       return res.status(RESPONSE['code']).json(RESPONSE);
     } catch (error) {
-      console.log('Error método: getAllUsers');
       return res.status(400).json(error);
     }
   }
 
   /**
-   * Controller of the method addUser.
+   * Filter user by email.
+   * @param data Email to search.
+   * @returns The user.
    */
-  @Post('add')
-  async addUser(@Body() user: AddUserDto, @Res() res: Response) {
-    try {
-      const RESPONSE = await this.userService.addUser(user);
-      return res.status(RESPONSE['code']).json(RESPONSE);
-    } catch (error) {
-      console.log('Error método: addUser');
-      return res.status(400).json(error);
-    }
+  @Public()
+  @Post('findByEmail')
+  getInvoiceByEmail(@Body() data: { email: string }) {
+   return this.userService.findByEmail(data.email);
   }
 
+  @Post('add')
+  async addUser(@Body() user: IUser){
+    return this.userService.addUser(user);
+  }
+  
   /**
    * Controller of the method updateUser.
    */
@@ -61,21 +65,6 @@ export class UserController {
       const RESPONSE = await this.userService.updateUser(userToUpdate);
       return res.status(RESPONSE['code']).json(RESPONSE);
     } catch (error) {
-      console.log('Error método: updateUser');
-      return res.status(400).json(error);
-    }
-  }
-
-  /**
-   * Controller of the method deleteUSer.
-   */
-  @Post('delete')
-  async deleteUSer(@Body() userToDelete: DeleteUserDto, @Res() res: Response) {
-    try {
-      const RESPONSE = await this.userService.deleteUser(userToDelete);
-      return res.status(RESPONSE['code']).json(RESPONSE);
-    } catch (error) {
-      console.log('Error método: updateUser');
       return res.status(400).json(error);
     }
   }
@@ -99,11 +88,19 @@ export class UserController {
   }
 
   /**
-   * Controller of the method change password.
+   * Controller of the method recovery password.
    */
   @Public()
-  @Post('change-password')
-  async changePassword(@Body() body: { password: string; token: string }) {
-    return this.userService.changePassword(body.password, body.token);
+  @Post('recovery-password')
+  async recoveryPassword(@Body() body: { password: string; token: string }) {
+    return this.userService.recoveryPassword(body.password, body.token);
   }
+
+    /**
+   * Controller of the method change password.
+   */
+    @Post('change-password/:id')
+    async changePassword(@Body() body: { actualPassword: string; newPassword: string }, @Param("id") id: string) {
+      return this.userService.changePassword(body.actualPassword, body.newPassword, id);
+    }
 }
