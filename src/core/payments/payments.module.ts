@@ -10,7 +10,7 @@ import { SharedModule } from 'src/shared/shared.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: Payment.name, schema: PaymentSchema },
+      { name: Payment.name, schema: PaymentSchema }
     ]),
     UserModule,
     SharedModule
