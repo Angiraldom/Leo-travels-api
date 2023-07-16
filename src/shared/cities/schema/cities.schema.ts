@@ -19,7 +19,8 @@ export class City extends Document {
     @Prop()
     nombreMunicipio: string;
     
-    
+    @Prop({ type: Object })
+    shippingPrice: Object;
 }
 
 export const CitySchema = SchemaFactory.createForClass(City);
