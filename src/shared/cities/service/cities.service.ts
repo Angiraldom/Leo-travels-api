@@ -20,7 +20,7 @@ export class CitiesService {
             {
                 $group: {
                     _id: "$nombreDepartamento",
-                    nombreMunicipio: { $push: "$nombreMunicipio" },
+                    municipalities: { $push: "$$ROOT" }
                 }
             }
         ]);
