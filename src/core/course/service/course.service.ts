@@ -86,7 +86,8 @@ export class CourseService {
     return buildResponseSuccess({
       data: {
         class: objectClass,
-        nameModule: module.name
+        nameModule: module.name,
+        nameCourse: course.name
       },
     });
   }

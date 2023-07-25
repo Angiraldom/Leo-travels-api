@@ -34,4 +34,11 @@ export class CommentsService {
       data: comments,
     });
   }
+
+  async removeComment(idComment: string) {
+    const comments = await this.commentsModel.findByIdAndDelete(idComment);
+    return buildResponseSuccess({
+      data: comments,
+    });
+  }
 }
