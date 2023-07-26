@@ -18,6 +18,9 @@ export class Product extends Document {
   @Prop({ type: Number })
   discount: number;
 
+  @Prop({ type: String })
+  discountDescription: string;
+
   @Prop({ type: Array<string> })
   images: Array<string>;
 
