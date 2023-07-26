@@ -8,5 +8,7 @@ export interface IProduct {
     updatedAt?: Date | string;
     category?: any[];
     amount?: number;
-    modules?: any[]
+    modules?: any[];
+    discount?: number;
+    discountDescription?: string;
 }
