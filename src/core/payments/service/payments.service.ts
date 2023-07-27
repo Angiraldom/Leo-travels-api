@@ -42,11 +42,11 @@ export class PaymentsService {
     }
     const productsRedis = await this.redisService.getData(data.data.transaction.reference);
 
-    data.products = JSON.parse(productsRedis);
+    data.products = JSON.parse(productsRedis).products;
 
-    const hasModules = this.validateRedisProduct(data.products)
+    const hasModules = this.validateRedisProduct(data.products);
     if (hasModules) {
-      const hasUser = await this.userService.findUserByEmail(data.data.transaction.customer_email)
+      const hasUser = await this.userService.findUserByEmail(data.data.transaction.customer_email);
       if (!hasUser) {
         const newUser: IUser = {
           name: data.data.transaction.customer_data.full_name,
@@ -57,13 +57,12 @@ export class PaymentsService {
           role: "Cliente",
           phone: data.data.transaction.customer_data.phone_number
         }
-        const addNewUser = await this.userService.addUser(newUser)
+        const addNewUser = await this.userService.addUser(newUser);
         if (addNewUser.data) {
           await this.sendMailProducts(data, newUser.password);
-      }
+        }
         return response.status(201);
       }
-      
     }
     await this.sendMailProductsIndependent(data);
     await this.create(data);
@@ -126,15 +125,8 @@ export class PaymentsService {
   }
 
   async sendMailProductsIndependent(dataTransaction: IWompi) {
-    const user = await this.userService.findUserByEmail(dataTransaction.data.transaction.customer_email);
-    if (!user) {
-      throw new NotFoundException({
-        customMessage: 'El email no existe',
-        tag: 'ErrorEmailNotFound',
-      });
-    }
     const data = {
-      ...user,
+      email: dataTransaction.data.transaction.customer_email,
       products: [...dataTransaction.products],
       total: this.getTotalValue(dataTransaction.products),
       transaction: dataTransaction.data

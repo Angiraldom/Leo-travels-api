@@ -29,6 +29,8 @@ export class EmailService {
       port: 465,
       secure: true,
       auth: {
+        // user: 'johnatan.r259@gmail.com',
+        // pass: 'cdxcaicxvkbhtraz',
         user: this.config.email.username,
         pass: this.config.email.password,
       },
