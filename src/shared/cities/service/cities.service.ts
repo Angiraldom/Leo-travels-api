@@ -7,11 +7,7 @@ import { buildResponseSuccess } from "src/shared/utils/utilities/Response.util";
 @Injectable()
 export class CitiesService {
 
-    constructor(@InjectModel("Cities") private readonly citieModel: Model<City>) {
-
-    }
-
-
+    constructor(@InjectModel("Cities") private readonly citieModel: Model<City>) {}
 
     async getAllCities() {
 
@@ -23,7 +19,7 @@ export class CitiesService {
                     municipalities: { $push: "$$ROOT" }
                 }
             }
-        ]);
+        ]).sort({ _id: 1 });
 
         return buildResponseSuccess({
             data : cities
