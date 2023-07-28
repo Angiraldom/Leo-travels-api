@@ -36,6 +36,12 @@ export class Product extends Document {
   @Prop({ type: Number })
   long: number;
 
+  @Prop({ type: Number })
+  taxes: number;
+
+  @Prop({ type: Number })
+  priceWithoutTaxes: number;
+  
   // @Prop({ type: Array<string> })
   // tags: Array<string>;
 
