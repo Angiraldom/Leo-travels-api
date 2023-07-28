@@ -155,9 +155,11 @@ export class CourseService {
       });
     }
 
-    const image = await this.uploadImage(file);
-    updateCourseDto['portada'] = image.Location;
-    updateCourseDto['namePortada'] = image.Key;
+    if (file) {
+      const image = await this.uploadImage(file);
+      updateCourseDto['portada'] = image.Location;
+      updateCourseDto['namePortada'] = image.Key;
+    }
 
     const newCourse = await this.courseModel.findByIdAndUpdate(
       id,

@@ -9,6 +9,7 @@ import {
   UploadedFiles,
   UseFilters,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductService } from '../service/product.service';
@@ -44,5 +45,10 @@ export class ProductController {
   @UseInterceptors(FilesInterceptor('images'))
   update(@UploadedFiles() file, @Body() data, @Param('id') id: string) {
     return this.productService.update(id, JSON.parse(data.data), file);
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.productService.delete(id);
   }
 }

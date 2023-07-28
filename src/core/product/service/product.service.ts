@@ -119,4 +119,11 @@ export class ProductService {
       });
     }
   }
+
+  async delete(id: string) {
+    await this.productModel.findByIdAndRemove(id);
+    return buildResponseSuccess({
+      data: 'Eliminado correctamente.',
+    });
+  }
 }

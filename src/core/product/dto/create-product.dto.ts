@@ -21,17 +21,26 @@ export class CreateProductDto {
     { allowNaN: false },
     { message: 'It must be of number type (price).' },
   )
-  @IsPositive({ message: 'You must provide a positive number price' })
+  @Min(0, { message: 'You must provide a positive number price' })
   @IsNotEmpty({ message: 'You must provide a price' })
   price: number;
 
   @IsNumber(
     { allowNaN: false },
-    { message: 'It must be of number type (weight).' },
+    { message: 'It must be of number type (taxes).' },
   )
-  @IsPositive({ message: 'You must provide a positive number weight' })
-  @IsOptional()
-  weight: number;
+  @Min(0, { message: 'You must provide a positive number taxes' })
+  @IsNotEmpty({ message: 'You must provide a taxes' })
+  taxes: number;
+
+  @IsNumber(
+    { allowNaN: false },
+    { message: 'It must be of number type (priceWithoutTaxes).' },
+  )
+  @Min(0, { message: 'You must provide a positive number priceWithoutTaxes' })
+  @IsNotEmpty({ message: 'You must provide a priceWithoutTaxes' })
+  priceWithoutTaxes: number;
+
 
   @IsNumber(
     { allowNaN: false },
