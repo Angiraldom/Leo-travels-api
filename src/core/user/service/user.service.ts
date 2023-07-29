@@ -152,14 +152,15 @@ export class UserService {
       });
     }
     const token = this.generateTokenPassword(user);
+    const urlLogin = this.config.urlLogin;
     const data = {
       ...user,
-      link: `http://localhost:4200/change-password?token=${token}`,
+      link: `${urlLogin}?token=${token}`,
     };
-
+  
     const configEmail = {
       subject: 'Cambio de contraseña',
-      from: 'Email test',
+      from: 'Vilean',
       to: data.email,
     };
     const res = await this.emailService.sendMail(
