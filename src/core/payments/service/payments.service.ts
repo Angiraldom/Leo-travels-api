@@ -110,8 +110,8 @@ export class PaymentsService {
     };
 
     const configEmail = {
-      subject: 'Confirmación compra de productos',
-      from: 'Email test',
+      subject: '¡PEDIDO CONFIRMADO! 🥳💙',
+      from: 'Vilean',
       to: data.email,
     };
     const res = await this.emailService.sendMail(
@@ -133,8 +133,8 @@ export class PaymentsService {
     };
 
     const configEmail = {
-      subject: 'Confirmación compra de productos',
-      from: 'Email test',
+      subject: '¡PEDIDO CONFIRMADO! 🥳💙',
+      from: 'Vilean',
       to: data.email,
     };
     const res = await this.emailService.sendMail(
