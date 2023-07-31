@@ -1,8 +1,8 @@
-import { Prop, SchemaFactory } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Types } from 'mongoose';
-import { IProduct } from "src/core/product/interface/IProduct.interface";
 import { Product } from "src/core/product/schema/product.schema";
 
+@Schema()
 export class DiscountCoupon extends Document {
   @Prop({ type: String })
   coupon: string;
@@ -13,8 +13,8 @@ export class DiscountCoupon extends Document {
   @Prop({ type: Number })
   discount: number;
 
-  @Prop({ type: [Product] })
-  products: Types.Array<Record<string, IProduct>>;
+  @Prop({ type: [{type: Types.ObjectId, ref: Product.name }]})
+  products: Types.Array<Product>;
 
   @Prop({ type: Date })
   startDate: Date;

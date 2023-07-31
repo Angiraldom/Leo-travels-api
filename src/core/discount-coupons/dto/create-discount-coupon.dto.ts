@@ -1,13 +1,11 @@
-import { Type } from 'class-transformer';
 import {
-    IsDate,
+  IsArray,
+  IsDateString,
   IsNotEmpty,
   IsNumber,
   IsString,
   Min,
-  ValidateNested,
 } from 'class-validator';
-import { CreateProductDto } from 'src/core/product/dto/create-product.dto';
 
 export class CreateDiscountCouponDto {
   @IsString({ message: 'It must be of string type (coupon).' })
@@ -26,15 +24,15 @@ export class CreateDiscountCouponDto {
   @IsNotEmpty({ message: 'You must provide a discount' })
   discount: number;
 
-  @IsDate({ message: 'It must be of Date type (startDate).' })
+  @IsDateString({}, { message: 'It must be of Date type (startDate).' })
   @IsNotEmpty({ message: 'You must provide a startDate' })
   startDate: Date;
 
-  @IsDate({ message: 'It must be of Date type (endDate).' })
+  @IsDateString({strict: false}, { message: 'It must be of Date type (endDate).' })
   @IsNotEmpty({ message: 'You must provide a endDate' })
   endDate: Date;
 
-  @ValidateNested({message: 'It must be of array type (products).'})
-  @Type(() => CreateProductDto)
-  products: CreateProductDto[];
+  @IsArray({ message: 'It must be of array IDs products type (products).' })
+  @IsNotEmpty()
+  products: string[];
 }
