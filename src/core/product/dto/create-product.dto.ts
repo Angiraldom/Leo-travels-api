@@ -3,7 +3,6 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
   Min,
 } from 'class-validator';
@@ -58,11 +57,4 @@ export class CreateProductDto {
   @IsNotEmpty({ message: 'You must provide a status' })
   @IsOptional()
   status: boolean;
-
-  //   @IsObject({ message: 'You must provide a valid creator' })
-  //   @IsNotEmptyObject({nullable: false}, { message: 'You must provide a valid creator' })
-  //   @IsNotEmpty({ message: 'You must provide a creator' })
-  //   @ValidateNested()
-  //   @Type(() => AddUserDto)
-  //   creator: AddUserDto;
 }
