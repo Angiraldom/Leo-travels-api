@@ -4,6 +4,7 @@ import { CreateDiscountCouponDto } from '../dto/create-discount-coupon.dto';
 import { UpdateDiscountCouponDto } from '../dto/update-discount-coupon.dto';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
+import { Public } from 'src/core/auth/decorators/public.decorator';
 
 @UseFilters(HttpExceptionFilter)
 @UseGuards(JwtAuthGuard)
@@ -21,9 +22,10 @@ export class DiscountCouponsController {
     return this.discountCouponsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.discountCouponsService.findOne(id);
+  @Public()
+  @Get(':coupon')
+  findOne(@Param('coupon') coupon: string) {
+    return this.discountCouponsService.findOne(coupon);
   }
 
   @Patch(':id')

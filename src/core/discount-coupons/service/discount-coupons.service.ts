@@ -33,10 +33,19 @@ export class DiscountCouponsService {
     });
   }
 
-  async findOne(id: string) {
-    const coupon = await this.discountCouponModel.findById(id);
+  async findOne(coupon: string) {
+    const res = await this.discountCouponModel.findOne({
+      coupon,
+      startDate: {
+        $lte: new Date()
+      },
+      endDate: {
+        $gte: new Date()
+      }
+    });
+
     return buildResponseSuccess({
-      data: coupon,
+      data: res,
     });
   }
 
