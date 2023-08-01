@@ -11,7 +11,6 @@ import { EmailService } from 'src/shared/service/email.service';
 import { buildResponseSuccess } from 'src/shared/utils/utilities/Response.util';
 import { IRequestResponse } from 'src/shared/utils/interface/IRequestResponse.interface';
 import { IWompi } from '../interface/IResponseWompi.interface';
-import { IRedisResponse } from 'src/core/product/interface/IRedisResponse.interface';
 import { IProduct } from 'src/core/product/interface/IProduct.interface';
 import { IUser } from 'src/core/user/interface/IUser.interface';
 import configuration from '../../../config';
