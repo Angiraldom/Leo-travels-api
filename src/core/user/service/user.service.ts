@@ -49,7 +49,7 @@ export class UserService {
   async addUser(user: IUser): Promise<IRequestResponse> {
     //Validate user by identification.
     const EXIST_USER = await this.findUser({
-      numberDocument: user.email,
+      email: user.email,
     });
 
     await validateAction(
