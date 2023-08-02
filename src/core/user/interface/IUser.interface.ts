@@ -13,4 +13,5 @@ export interface IUser {
   residenceAddress?: string;
   codePostal?: string;
   phone?: string;
+  createdAt?: Date;
 }
