@@ -39,6 +39,9 @@ export class User extends Document {
 
   @Prop({ type: Boolean, default: true })
   status: boolean;
+
+  @Prop({ type: Date })
+  createdAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

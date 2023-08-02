@@ -60,9 +60,8 @@ export class UserService {
 
     //Encrypt password.
     const PASSWORD = await encrypt(user?.password);
-
     //Save user.
-    const NEW_USER = new this.userModel({ ...user, password: PASSWORD });
+    const NEW_USER = new this.userModel({ ...user, createdAt: new Date(), password: PASSWORD });
     await NEW_USER.save();
 
     return buildResponseSuccess({ code: 201, data: true });
