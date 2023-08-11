@@ -5,7 +5,7 @@ export class Classes extends Document {
   @Prop({ type: String })
   name: string;
 
-  @Prop({ type: URL })
+  @Prop({ type: String })
   url: string;
 
   @Prop({ type: Boolean, default: false })
