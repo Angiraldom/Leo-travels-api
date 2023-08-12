@@ -84,11 +84,13 @@ export class ProductService {
         url: result.Location 
       }
     });
+
     updateProductDto['imageProperties'] = [
       ...updateProductDto['imageProperties'],
       ...newImages,
     ];
-
+    updateProductDto['imageProperties'] = updateProductDto['imageProperties'].filter((item) => item.url);
+    
     await this.productModel.findByIdAndUpdate(id, { ...updateProductDto });
 
     return buildResponseSuccess({
