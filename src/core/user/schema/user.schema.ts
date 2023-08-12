@@ -19,7 +19,7 @@ export class User extends Document {
   @Prop({ type: String })
   typeDocument: string;
 
-  @Prop({ type: Number, unique: true })
+  @Prop({ type: Number })
   numberDocument: number;
 
   @Prop({ type: String })
