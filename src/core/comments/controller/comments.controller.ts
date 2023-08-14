@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, UseFilters, Request, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, UseFilters, Request, Delete, Query } from '@nestjs/common';
 
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { CommentsService } from '../service/comments.service';
@@ -15,6 +15,14 @@ export class CommentsController {
   create(@Body() createCommentDto: CreateCommentDto, @Request() req) {
     return this.commentsService.create(createCommentDto, req.user.sub);
   }
+  
+  @Get('getAll')
+  findAll(
+    @Query("limit") limit: number,
+    @Query("offset") offset: number
+  ) {
+    return this.commentsService.findAll(limit, offset);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -24,5 +32,10 @@ export class CommentsController {
   @Delete(':id')
   removeComment(@Param('id') id: string) {
     return this.commentsService.removeComment(id);
+  }
+
+  @Post('saveAnswer/:idComment')
+  saveAnswer(@Param('idComment') id: string, @Body() body: {answer: string}, @Request() req) {
+    return this.commentsService.saveAnswer(id, body.answer, req.user.sub);
   }
 }

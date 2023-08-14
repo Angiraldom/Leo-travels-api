@@ -16,7 +16,7 @@ export class CommentsService {
   async create(createCommentDto: CreateCommentDto, idUser: Types.ObjectId) {
     const payload = {
       ...createCommentDto,
-      user: idUser
+      user: idUser,
     };
 
     const newComment = new this.commentsModel(payload);
@@ -28,8 +28,26 @@ export class CommentsService {
   }
 
   async findOne(idClass: string) {
-    const comments = await this.commentsModel.find({ idClass: idClass })
-    .populate('user', 'name lastName');
+    const comments = await this.commentsModel
+      .find({ 'class._id': idClass })
+      .sort({ createdAt: -1 })
+      .populate('user', 'name lastName')
+      .populate({ path: 'answers.user', select: 'name lastName', model: 'Users' })
+      .exec();
+    
+    return buildResponseSuccess({
+      data: comments,
+    });
+  }
+
+  async findAll(limit: number, offset: number) {
+    const comments = await this.commentsModel
+      .find()
+      .skip(limit * offset)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .populate('user', 'name lastName');
+    
     return buildResponseSuccess({
       data: comments,
     });
@@ -39,6 +57,24 @@ export class CommentsService {
     const comments = await this.commentsModel.findByIdAndDelete(idComment);
     return buildResponseSuccess({
       data: comments,
+    });
+  }
+
+  async saveAnswer(idComment: string, answer: string, idUser: Types.ObjectId) {
+    const body = {
+      answer,
+      createdAt: new Date(),
+      user: idUser,
+      seenBy: []
+    };
+
+    const comment = await this.commentsModel.findByIdAndUpdate(idComment, {
+      $push: {
+        answers: body,
+      },
+    });
+    return buildResponseSuccess({
+      data: comment,
     });
   }
 }
