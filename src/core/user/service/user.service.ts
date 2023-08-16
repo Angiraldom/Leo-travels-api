@@ -151,7 +151,7 @@ export class UserService {
       });
     }
     const token = this.generateTokenPassword(user);
-    const urlLogin = this.config.urlLogin;
+    const urlLogin = this.config.urlChangePassword;
     const data = {
       ...user,
       link: `${urlLogin}?token=${token}`,
