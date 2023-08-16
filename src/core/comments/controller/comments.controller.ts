@@ -15,14 +15,6 @@ export class CommentsController {
   create(@Body() createCommentDto: CreateCommentDto, @Request() req) {
     return this.commentsService.create(createCommentDto, req.user.sub);
   }
-  
-  @Get('getAll')
-  findAll(
-    @Query("limit") limit: number,
-    @Query("offset") offset: number
-  ) {
-    return this.commentsService.findAll(limit, offset);
-  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -35,7 +27,7 @@ export class CommentsController {
   }
 
   @Post('saveAnswer/:idComment')
-  saveAnswer(@Param('idComment') id: string, @Body() body: {answer: string}, @Request() req) {
-    return this.commentsService.saveAnswer(id, body.answer, req.user.sub);
+  saveAnswer(@Param('idComment') id: string, @Body() body: { answer: string; idCreatorComment: string }, @Request() req) {
+    return this.commentsService.saveAnswer(id, body.answer, req.user.sub, body.idCreatorComment);
   }
 }

@@ -4,7 +4,7 @@ import { Classes } from 'src/core/course/schema/classes.schema';
 import { User } from 'src/core/user/schema/user.schema';
 
 @Schema()
-export class Comment extends Document {
+export class Comments extends Document {
   @Prop({ type: Classes })
   class: Classes;
 
@@ -23,16 +23,13 @@ export class Comment extends Document {
   @Prop()
   answers: [{
     answer: String,
-    user: { type: Types.ObjectId, ref: 'Users' },
+    creator: { type: Types.ObjectId, ref: 'Users' },
     createdAt: Date,
-    seenBy: Types.Array<User>,
+    _id: String,
   }];
-
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Users' }] })
-  seenBy: Types.Array<User>;
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;
 }
 
-export const CommentSchema = SchemaFactory.createForClass(Comment);
+export const CommentSchema = SchemaFactory.createForClass(Comments);
