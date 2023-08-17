@@ -50,9 +50,11 @@ export class CommentsService {
     });
   }
 
-  // Eliminar todas las respuestas del comentario a eliminar.
   async removeComment(idComment: string) {
     const comments = await this.commentsModel.findByIdAndDelete(idComment);
+
+    await this.notificationsService.removeNotificationsComments(idComment);
+
     return buildResponseSuccess({
       data: comments,
     });
@@ -83,6 +85,21 @@ export class CommentsService {
 
     return buildResponseSuccess({
       data: comment,
+    });
+  }
+
+  async removeAnswer(idComment: string, idAnswer: string) {
+    const comment = await this.commentsModel.findById(idComment);
+    
+    const answersList: any = comment.answers.filter((item) => item._id !== idAnswer);
+    comment.answers = answersList;
+    comment.markModified('modules');
+    await comment.save();
+
+    await this.notificationsService.removeNotificationsAnswers(idAnswer);
+
+    return buildResponseSuccess({
+      data: 'Eliminado exitosamente',
     });
   }
 }

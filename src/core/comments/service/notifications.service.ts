@@ -16,6 +16,7 @@ export class NotificationsService {
   async create(payload: INotifications) {
     const body = new this.notificationModel({
       ...payload,
+      comment: payload.comment.toString()
     });
     await body.save();
 
@@ -106,6 +107,26 @@ export class NotificationsService {
 
     return buildResponseSuccess({
       data: 'Actualizado correctamente',
+    });
+  }
+
+  async removeNotificationsComments(idComment: string) {
+    await this.notificationModel.deleteMany({
+      comment: idComment
+    });
+
+    return buildResponseSuccess({
+      data: 'Eliminado exitosamente',
+    });
+  }
+
+  async removeNotificationsAnswers(idAnswer: string) {
+    await this.notificationModel.deleteMany({
+      answer: idAnswer
+    });
+
+    return buildResponseSuccess({
+      data: 'Eliminado exitosamente',
     });
   }
 }

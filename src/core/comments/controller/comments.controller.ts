@@ -26,6 +26,11 @@ export class CommentsController {
     return this.commentsService.removeComment(id);
   }
 
+  @Delete('deleteAnswer/:idComment/:idAnswer')
+  removeAnswer(@Param('idComment') idComment: string, @Param('idAnswer') idAnswer: string) {
+    return this.commentsService.removeAnswer(idComment, idAnswer);
+  }
+
   @Post('saveAnswer/:idComment')
   saveAnswer(@Param('idComment') id: string, @Body() body: { answer: string; idCreatorComment: string }, @Request() req) {
     return this.commentsService.saveAnswer(id, body.answer, req.user.sub, body.idCreatorComment);
