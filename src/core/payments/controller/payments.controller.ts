@@ -1,19 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  HttpCode,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
 
 import { PaymentsService } from '../service/payments.service';
 import { RedisService } from 'src/shared/service/redis.service';
 import { IWompi } from '../interface/IResponseWompi.interface';
+import { Public } from 'src/core/auth/decorators/public.decorator';
+import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
+import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 
+@UseFilters(HttpExceptionFilter)
+@UseGuards(JwtAuthGuard)
 @Controller('payments')
 export class PaymentsController {
   constructor(
     private readonly paymentsService: PaymentsService,
-    private redisService: RedisService) {}
+    private redisService: RedisService,
+  ) {}
 
+  @Public()
   @Post('notification')
   @HttpCode(200)
   wompiNotification(@Body() data: IWompi) {
-   return this.paymentsService.validateWompi(data);
+    return this.paymentsService.validateWompi(data);
   }
 
   @Get('getPayments')
@@ -22,7 +39,7 @@ export class PaymentsController {
   }
 
   @Post('saveProduct')
-  saveProduct(@Body() body: {reference: string; product: {}}) {
+  saveProduct(@Body() body: { reference: string; product: {} }) {
     return this.redisService.saveData(body);
   }
 
@@ -32,8 +49,7 @@ export class PaymentsController {
   }
 
   @Patch('updateAllProducts')
-  updateAllProducts(@Body() body: {reference: string; products: []}) {
+  updateAllProducts(@Body() body: { reference: string; products: [] }) {
     return this.redisService.updateAllProducts(body.reference, body.products);
   }
 }
-
