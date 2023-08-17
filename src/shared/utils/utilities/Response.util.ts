@@ -7,12 +7,18 @@ export const buildResponseSuccess = ({
   data,
   msg,
   code = 200,
+  totalRecords
 }: IRequestResponse): IRequestResponse => {
-  return {
+
+  const response = {
     data: data || {},
     msg: msg || 'The request was successful.',
     code,
   };
+
+  if (totalRecords) response['totalRecords'] = totalRecords; 
+
+  return response;
 };
 
 const defaultError = (

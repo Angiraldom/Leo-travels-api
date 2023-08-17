@@ -27,6 +27,7 @@ export default registerAs('configuration', () => {
     },
     jwtSecret: process.env.JWT_SECRET,
     jwtSecretRecoverPassword: process.env.JWT_SECRET_RECOVER_PASSWORD,
-    urlLogin : process.env.URL_LOGIN
+    urlLogin : process.env.URL_LOGIN,
+    urlChangePassword : process.env.URL_CHANGE_PASSWORD,
   };
 });
