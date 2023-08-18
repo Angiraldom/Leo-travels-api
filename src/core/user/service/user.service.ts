@@ -21,6 +21,7 @@ import { REQUIRED_PROPERTIES } from '../constant/fieldsValidation.constant';
 import { EmailService } from 'src/shared/service/email.service';
 import configuration from '../../../config';
 import { IPayloadToken } from 'src/core/auth/interface/IPayloadToken.interface';
+import { ClassDto } from 'src/core/course/dto/class.dto';
 
 @Injectable()
 export class UserService {
@@ -236,6 +237,41 @@ export class UserService {
       data: await this.userModel.findOne({
         email
       }, { password: 0 })
+    });
+  }
+
+  /**
+   * Update the state class for completed or uncompleted.
+   * @param idCourse 
+   * @param idModule 
+   * @param idClass 
+   * @param data 
+   * @returns 
+   */
+  async updateClass(
+    idCourse: string,
+    idModule: string,
+    idClass: string,
+    idUser: string,
+    data: ClassDto,
+  ) {
+    const user = await this.userModel.findById(idUser);
+
+    const course = user.courses?.find((itemCourse) => itemCourse._id == idCourse);
+
+    const module = course?.modules?.find((module) => module._id === idModule);
+    module.classes = module?.classes?.map((item) => {
+      if (item._id === idClass) {
+        item = { ...item, ...data };
+      }
+      return item;
+    });
+    user.markModified('courses');
+    user.markModified('modules');
+    user.markModified('classes');
+    await user.save();
+    return buildResponseSuccess({
+      data: 'Actualizado exitosamente',
     });
   }
 }

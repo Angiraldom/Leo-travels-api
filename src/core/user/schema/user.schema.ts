@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { Document } from 'mongoose';
+import { Course } from 'src/core/course/schema/course.schema';
 
 @Schema()
 export class User extends Document {
@@ -39,6 +40,9 @@ export class User extends Document {
 
   @Prop({ type: Boolean, default: true })
   status: boolean;
+
+  @Prop({ type: Array<Course> })
+  courses: Course[];
 
   @Prop({ type: Date })
   createdAt: Date;

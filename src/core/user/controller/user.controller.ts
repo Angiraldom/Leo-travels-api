@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   Res,
@@ -19,6 +20,7 @@ import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { Public } from 'src/core/auth/decorators/public.decorator';
 import { IUser } from '../interface/IUser.interface';
+import { UpdateClassDto } from 'src/core/course/dto/class.dto';
 
 
 @UseFilters(HttpExceptionFilter)
@@ -96,11 +98,24 @@ export class UserController {
     return this.userService.recoveryPassword(body.password, body.token);
   }
 
-    /**
-   * Controller of the method change password.
-   */
-    @Post('change-password/:id')
-    async changePassword(@Body() body: { actualPassword: string; newPassword: string }, @Param("id") id: string) {
-      return this.userService.changePassword(body.actualPassword, body.newPassword, id);
-    }
+  /**
+  * Controller of the method change password.
+  */
+  @Post('change-password/:id')
+  async changePassword(@Body() body: { actualPassword: string; newPassword: string }, @Param("id") id: string) {
+    return this.userService.changePassword(body.actualPassword, body.newPassword, id);
+  }
+
+  @Patch('completedClass/:idCourse/:idModule/:idClass')
+  completedClass(
+    @Param('idCourse') course: string, 
+    @Param('idModule') module: string, 
+    @Param('idClass') idClass: string, 
+    @Body() data: UpdateClassDto,
+    @Req() req: Request
+    ) {
+    const body: any = data;
+    const user = req.user as IPayloadToken;
+    return this.userService.updateClass(course, module, idClass, user.sub ,body);
+  }
 }

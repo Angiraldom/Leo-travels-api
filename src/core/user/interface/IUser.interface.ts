@@ -1,3 +1,4 @@
+import { ICourse } from 'src/core/course/interface/ICourse.interface';
 import { typeRoles } from '../constant/fieldsValidation.constant';
 
 export interface IUser {
@@ -14,4 +15,5 @@ export interface IUser {
   codePostal?: string;
   phone?: string;
   createdAt?: Date;
+  courses?: ICourse[] | any[];
 }

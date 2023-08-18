@@ -67,12 +67,6 @@ export class CourseController {
     return this.courseService.updateClass(course, module, idClass, data);
   }
 
-  @Patch('completedClass/:idCourse/:idModule/:idClass')
-  completedClass(@Param('idCourse') course: string, @Param('idModule') module: string, @Param('idClass') idClass: string, @Body() data: UpdateClassDto) {
-    const body: any = data;
-    return this.courseService.updateClass(course, module, idClass, body);
-  }
-
   @Delete('module/:idCourse/:idModule')
   deleteModule(@Param('idCourse') course: string, @Param('idModule') module: string) {
     return this.courseService.deleteModule(course, module);
