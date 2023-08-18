@@ -11,6 +11,7 @@ import { Course, CourseSchema } from './schema/course.schema';
     SharedModule,
   ],
   controllers: [CourseController],
-  providers: [CourseService]
+  providers: [CourseService],
+  exports: [CourseService]
 })
 export class CourseModule {}

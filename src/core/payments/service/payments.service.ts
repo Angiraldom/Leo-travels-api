@@ -14,6 +14,7 @@ import { IWompi } from '../interface/IResponseWompi.interface';
 import { IProduct } from 'src/core/product/interface/IProduct.interface';
 import { IUser } from 'src/core/user/interface/IUser.interface';
 import configuration from '../../../config';
+import { CourseService } from 'src/core/course/service/course.service';
 
 @Injectable()
 export class PaymentsService {
@@ -21,7 +22,8 @@ export class PaymentsService {
   @Inject(configuration.KEY) private config: ConfigType<typeof configuration>,
     private redisService: RedisService,
     private userService: UserService,
-    private emailService: EmailService) { }
+    private emailService: EmailService,
+    private courseService: CourseService) { }
 
   async create(createPayment: IWompi) {
     const NEW_INVOICE = new this.invoiceModel(createPayment);
@@ -54,8 +56,9 @@ export class PaymentsService {
           typeDocument: data.data.transaction.customer_data.legal_id_type,
           numberDocument: data.data.transaction.customer_data.legal_id,
           role: "Cliente",
-          phone: data.data.transaction.customer_data.phone_number
-        }
+          phone: data.data.transaction.customer_data.phone_number,
+          courses: await this.getCourses(data.products)
+        };
         const addNewUser = await this.userService.addUser(newUser);
         if (addNewUser.data) {
           await this.sendMailProducts(data, newUser.password);
@@ -83,6 +86,7 @@ export class PaymentsService {
 
     return pass;
   }
+
   getTotalValue(products: any[]) {
     const total: number = products.reduce((value, item) => {
       const price = item.price * item.amount;
@@ -150,4 +154,19 @@ export class PaymentsService {
     return data.some((element) => element.modules)
   }
 
+  async getCourses(data?: IProduct[]) {
+    const courses = data.filter((product) => product.modules);
+
+    if (!courses) {
+      return [];
+    }
+    
+    const coursesPromises = courses.map(async (file) => {
+      return await this.courseService.findCourseAndAddField(file._id);
+    });
+
+    const responseCourses = await Promise.all(coursesPromises);
+
+    return responseCourses.filter((item) => item);
+  }
 }

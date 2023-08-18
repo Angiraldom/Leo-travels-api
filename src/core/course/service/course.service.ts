@@ -256,4 +256,35 @@ export class CourseService {
       });
     }
   }
+
+  /**
+   * When de user buy a course, we need to associate that course to the user for having
+   * the control of the watched classes by the user.
+   * @param id CourseId.
+   * @returns Course.
+   */
+  async findCourseAndAddField(id: string) {
+    const mongoose = require('mongoose');
+    const validId = mongoose.Types.ObjectId.isValid(id);
+
+    if (!validId) {
+      return null;
+    }
+    const course = await this.courseModel.findById(new ObjectId(id));
+
+    if (!course) {
+      return null;
+    }
+
+    return this.addCompletedField(course);
+  }
+
+  addCompletedField(course: Course) {
+    course.modules.forEach((module) => {
+      module.classes = module.classes.map((itemClass) => {
+        return {...itemClass, completed: false};
+      });
+    });
+    return course;
+  }
 }

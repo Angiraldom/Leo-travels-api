@@ -6,6 +6,7 @@ import { Payment, PaymentSchema } from './schema/payment.schema';
 import { RedisService } from 'src/shared/service/redis.service';
 import { UserModule } from '../user/user.module';
 import { SharedModule } from 'src/shared/shared.module';
+import { CourseModule } from '../course/course.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { SharedModule } from 'src/shared/shared.module';
       { name: Payment.name, schema: PaymentSchema }
     ]),
     UserModule,
-    SharedModule
+    SharedModule,
+    CourseModule
   ],
   controllers: [PaymentsController],
   providers: [PaymentsService, RedisService]
