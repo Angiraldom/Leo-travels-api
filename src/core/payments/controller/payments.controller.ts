@@ -29,7 +29,7 @@ export class PaymentsController {
 @Public()
   @Get('notification-epayco')
   @HttpCode(200)
-  wompiNotificationEpaycoGet(@Body() data: IWompi) {
+  wompiNotificationEpaycoGet(@Param() data: any) {
     console.log(data);
     console.log('aca-entro');
     
