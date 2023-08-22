@@ -28,7 +28,7 @@ export class PaymentsController {
   ) {}
 
 @Public()
-  @Get('notification-epayco/:ref_payco')
+  @Get('notification-epayco')
   @HttpCode(200)
   wompiNotificationEpaycoGet(@Param() data, @Query() query, @Query('ref_payco') ref: any) {
     console.log(data);
