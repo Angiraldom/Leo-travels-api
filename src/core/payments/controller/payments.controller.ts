@@ -8,6 +8,7 @@ import {
   HttpCode,
   UseFilters,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 
 import { PaymentsService } from '../service/payments.service';
@@ -27,11 +28,14 @@ export class PaymentsController {
   ) {}
 
 @Public()
-  @Get('notification-epayco')
+  @Get('notification-epayco/:ref_payco')
   @HttpCode(200)
-  wompiNotificationEpaycoGet(@Param() data: any) {
+  wompiNotificationEpaycoGet(@Param() data, @Query() query, @Query('ref_payco') ref: any) {
     console.log(data);
     console.log('aca-entro');
+    console.log(query);
+    console.log(ref);
+    
     
   }
 
