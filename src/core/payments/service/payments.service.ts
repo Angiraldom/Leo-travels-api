@@ -108,7 +108,7 @@ export class PaymentsService {
       urlLogin : this.config.urlLogin,
       products: [...dataTransaction.products],
       password: passwordUser,
-      total: this.getTotalValue(dataTransaction.products),
+      total: dataTransaction.data.transaction.amount_in_cents,
       transaction: dataTransaction.data
     };
 
@@ -131,8 +131,9 @@ export class PaymentsService {
     const data = {
       email: dataTransaction.data.transaction.customer_email,
       products: [...dataTransaction.products],
-      total: this.getTotalValue(dataTransaction.products),
-      transaction: dataTransaction.data
+      total: dataTransaction.data.transaction.amount_in_cents,
+      transaction: dataTransaction.data,
+      name: dataTransaction.data.transaction.customer_data.full_name
     };
 
     const configEmail = {

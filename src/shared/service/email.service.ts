@@ -7,6 +7,7 @@ import * as path from 'path';
 
 import configuration from '../../config';
 import Mail from 'nodemailer/lib/mailer';
+import { IProduct } from 'src/core/product/interface/IProduct.interface';
 
 @Injectable()
 export class EmailService {
@@ -45,7 +46,11 @@ export class EmailService {
     templateName: string,
     ) {
       const transporter = this.createTransporter();
+
+      // Register helpers
       this.parseIntToCurrency();
+      this.getPriceValue();
+
       const emailTemplate = await this.compile(templateName, data);
       const responseEmail = await transporter.sendMail({
         ...configMail,
@@ -65,14 +70,30 @@ export class EmailService {
   }
 
   parseIntToCurrency(){
-    
-  hbs.registerHelper("parseCurrency",(price) => {
-
-    let COP = new Intl.NumberFormat('en-US', {
+    hbs.registerHelper('parseCurrency', (price) => {
+      let COP = new Intl.NumberFormat('en-US', {
         currency: 'COP',
         style: 'currency',
       }).format(price);
       return COP;
-  })
+    });
+  }
+
+  getPriceValue() {
+    hbs.registerHelper('getPriceValue', (product: IProduct) => {
+      let price = product.price;
+      if (product.discount) {
+        product.price *= product.amount;
+        product.discount *= product.amount;
+        let descuento = (product.price * product.discount) / 100;
+        price -= descuento;
+      }
+
+      let COP = new Intl.NumberFormat('en-US', {
+        currency: 'COP',
+        style: 'currency',
+      }).format(price);
+      return COP;
+    });
   }
 }
