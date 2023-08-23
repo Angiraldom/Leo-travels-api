@@ -1,15 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigType } from '@nestjs/config';
 
 import { IUser } from 'src/core/user/interface/IUser.interface';
 import { UserService } from 'src/core/user/service/user.service';
 import { comparePassword } from 'src/shared/function/encryptPassword.function';
 import { IPayloadToken } from '../interface/IPayloadToken.interface';
 import { buildResponseSuccess } from 'src/shared/utils/utilities/Response.util';
+import configuration from '../../../config';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(configuration.KEY) private config: ConfigType<typeof configuration>,
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
@@ -46,8 +49,33 @@ export class AuthService {
       data: {
         access_token: this.jwtService.sign(payload),
         user,
+        refresh_token: this.generateRefreshToken(payload)
       },
     });
     return response;
+  }
+
+  validateRefreshToken(refresh_token: string) {
+    const isValid = this.jwtService.verify(refresh_token, {
+      ignoreExpiration: false,
+      secret: this.config.jwtSecretRefreshToken,
+    });
+    if(!isValid) {
+      throw new UnauthorizedException({
+        customMessage: 'Token invalido',
+        tag: 'ErrorInvalidToken',
+      });
+    }
+    const user = this.jwtService.decode(refresh_token);
+    // Validar que debemos de responder, si es necesario el usuario o solo los dos tokens.
+    return this.generateJWT({ _id: user['_id'], role:  user['role'] });
+  }
+  
+
+  generateRefreshToken(payload: IPayloadToken) {
+    return this.jwtService.sign(payload, {
+      secret: this.config.jwtSecretRefreshToken,
+      expiresIn: '2h'
+    });
   }
 }
