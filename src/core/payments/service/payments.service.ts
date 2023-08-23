@@ -44,6 +44,7 @@ export class PaymentsService {
     const productsRedis = await this.redisService.getData(data.data.transaction.reference);
 
     data.products = JSON.parse(productsRedis).products;
+    data.shippingPrice = JSON.parse(productsRedis).shippingPrice;
 
     const hasModules = this.validateRedisProduct(data.products);
     if (hasModules) {
@@ -109,7 +110,8 @@ export class PaymentsService {
       products: [...dataTransaction.products],
       password: passwordUser,
       total: dataTransaction.data.transaction.amount_in_cents,
-      transaction: dataTransaction.data
+      transaction: dataTransaction.data,
+      shippingPrice: dataTransaction.shippingPrice
     };
 
     const configEmail = {
@@ -133,7 +135,8 @@ export class PaymentsService {
       products: [...dataTransaction.products],
       total: dataTransaction.data.transaction.amount_in_cents,
       transaction: dataTransaction.data,
-      name: dataTransaction.data.transaction.customer_data.full_name
+      name: dataTransaction.data.transaction.customer_data.full_name,
+      shippingPrice: dataTransaction.shippingPrice
     };
 
     const configEmail = {

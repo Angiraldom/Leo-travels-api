@@ -7,7 +7,8 @@ export interface IWompi {
     signature?: Signature;
     timestamp?: number;
     environment?: string;
-    products: IProduct[]
+    products: IProduct[];
+    shippingPrice: number;
   }
   
   export interface Data {
