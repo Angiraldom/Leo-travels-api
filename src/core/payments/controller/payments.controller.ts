@@ -27,25 +27,11 @@ export class PaymentsController {
     private redisService: RedisService,
   ) {}
 
-@Public()
+  @Public()
   @Get('notification-epayco')
   @HttpCode(200)
-  wompiNotificationEpaycoGet(@Param() data, @Query() query, @Query('ref_payco') ref: any) {
-    console.log(data);
-    console.log('aca-entro');
+  wompiNotificationEpaycoGet(@Query() query) {
     console.log(query);
-    console.log(ref);
-    
-    
-  }
-
-@Public()
-  @Post('notification-epayco')
-  @HttpCode(200)
-  wompiNotificationEpayco(@Body() data: IWompi) {
-        console.log(data);
-    console.log('aca-entro2');
-
   }
 
   @Public()
