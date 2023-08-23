@@ -84,7 +84,7 @@ export class RedisService {
    * @param {string} reference - Reference wompi.
    * @param products - Information to update.
    */
-  async updateAllProducts(reference: string, products: []) {
+  async updateAllProducts(reference: string, products: [], shippingPrice: number) {
     try {
       const CART_KEY = `cart:${reference}`;
 
@@ -93,6 +93,7 @@ export class RedisService {
       const obj = {
         reference,
         products,
+        shippingPrice
       };
       await this.client.set(CART_KEY, JSON.stringify(obj), 'EX', 3600);
 
