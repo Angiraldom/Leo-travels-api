@@ -26,6 +26,7 @@ export default registerAs('configuration', () => {
       user: process.env.REDISUSER
     },
     jwtSecret: process.env.JWT_SECRET,
+    jwtSecretRefreshToken: process.env.JWT_SECRET_REFRESH_TOKEN,
     jwtSecretRecoverPassword: process.env.JWT_SECRET_RECOVER_PASSWORD,
     urlLogin : process.env.URL_LOGIN,
     urlChangePassword : process.env.URL_CHANGE_PASSWORD,
