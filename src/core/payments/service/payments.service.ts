@@ -25,7 +25,7 @@ export class PaymentsService {
     private emailService: EmailService,
     private courseService: CourseService) { }
 
-  async create(createPayment: IWompi) {
+  async createPayment(createPayment: IWompi) {
     const NEW_INVOICE = new this.invoiceModel(createPayment);
     await NEW_INVOICE.save();
   }
@@ -64,11 +64,12 @@ export class PaymentsService {
         if (addNewUser.data) {
           await this.sendMailProducts(data, newUser.password);
         }
+        await this.createPayment(data);
         return response.status(201);
       }
     }
     await this.sendMailProductsIndependent(data);
-    await this.create(data);
+    await this.createPayment(data);
     this.redisService.deleteRedisReference(data.data.transaction.reference);
   }
 
