@@ -97,16 +97,13 @@ export class EmailService {
     });
 
     hbs.registerHelper('calculateDiscount', (product: IProduct) => {
-      let precioOriginal = product.price;
-      let porcentajeDescuento = product.discount;
-      precioOriginal *= product.amount;
-      porcentajeDescuento *= product.amount;
-      let descuento = (precioOriginal * porcentajeDescuento) / 100;
+      const descuento = (product.price * product.discount) / 100;
+      const total = descuento * product.amount;
 
       let COP = new Intl.NumberFormat('en-US', {
         currency: 'COP',
         style: 'currency',
-      }).format(descuento);
+      }).format(total);
       return COP;
     });
 
