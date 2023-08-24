@@ -38,7 +38,7 @@ export class UserService {
    */
   async getAllUsers(): Promise<IRequestResponse> {
     return buildResponseSuccess({
-      data: await this.userModel.find({}, { password: 0 }).sort({ name: 1 }),
+      data: await this.userModel.find({}, { password: 0 }).sort({ createdAt: 1 }),
     });
   }
 
