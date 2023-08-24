@@ -96,6 +96,11 @@ export class PaymentsService {
     return total;
   }
 
+  /**
+   * Send course email.
+   * @param dataTransaction Data about the payment.
+   * @param passwordUser Password for the new user. 
+   */
   async sendMailProducts(dataTransaction: IWompi, passwordUser?: string) {
     const user = await this.userService.findUserByEmail(dataTransaction.data.transaction.customer_email);
     if (!user) {
@@ -104,14 +109,16 @@ export class PaymentsService {
         tag: 'ErrorEmailNotFound',
       });
     }
+    const total = dataTransaction.data.transaction.amount_in_cents.toString();
     const data = {
       ...user,
       urlLogin : this.config.urlLogin,
       products: [...dataTransaction.products],
       password: passwordUser,
-      total: dataTransaction.data.transaction.amount_in_cents,
+      total: Number(total.slice(0, total.length - 2)),
       transaction: dataTransaction.data,
-      shippingPrice: dataTransaction.shippingPrice
+      shippingPrice: dataTransaction.shippingPrice,
+      name: dataTransaction.data.transaction.customer_data.full_name,
     };
 
     const configEmail = {
@@ -122,18 +129,23 @@ export class PaymentsService {
     const res = await this.emailService.sendMail(
       configEmail,
       data,
-      'send-buy-products',
+      'course-email',
     );
     return buildResponseSuccess({
       data: res ?? 'The mail was send successfully',
     });
   }
 
+  /**
+   * Send mail products and travel kit.
+   * @param dataTransaction Data about the payment.
+   */
   async sendMailProductsIndependent(dataTransaction: IWompi) {
+    const total = dataTransaction.data.transaction.amount_in_cents.toString();
     const data = {
       email: dataTransaction.data.transaction.customer_email,
       products: [...dataTransaction.products],
-      total: dataTransaction.data.transaction.amount_in_cents,
+      total: Number(total.slice(0, total.length - 2)),
       transaction: dataTransaction.data,
       name: dataTransaction.data.transaction.customer_data.full_name,
       shippingPrice: dataTransaction.shippingPrice
@@ -147,7 +159,7 @@ export class PaymentsService {
     const res = await this.emailService.sendMail(
       configEmail,
       data,
-      'confirm-buy-products',
+      'products-email',
     );
     return buildResponseSuccess({
       data: res ?? 'The mail was send successfully',

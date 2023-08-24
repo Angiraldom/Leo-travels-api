@@ -39,22 +39,21 @@ export class EmailService {
     });
     return transporter;
   }
-  
+
   async sendMail(
     configMail: Mail.Options,
     data: unknown,
     templateName: string,
-    ) {
-      const transporter = this.createTransporter();
+  ) {
+    const transporter = this.createTransporter();
 
-      // Register helpers
-      this.parseIntToCurrency();
-      this.getPriceValue();
+    // Register helpers
+    this.helpers();
 
-      const emailTemplate = await this.compile(templateName, data);
-      const responseEmail = await transporter.sendMail({
-        ...configMail,
-        html: emailTemplate,
+    const emailTemplate = await this.compile(templateName, data);
+    const responseEmail = await transporter.sendMail({
+      ...configMail,
+      html: emailTemplate,
     });
     return responseEmail;
   }
@@ -69,7 +68,7 @@ export class EmailService {
     return hbs.compile(html, { strict: false })(data);
   }
 
-  parseIntToCurrency(){
+  parseIntToCurrency() {
     hbs.registerHelper('parseCurrency', (price) => {
       let COP = new Intl.NumberFormat('en-US', {
         currency: 'COP',
@@ -79,16 +78,39 @@ export class EmailService {
     });
   }
 
-  getPriceValue() {
-    hbs.registerHelper('getPriceValue', (product: IProduct) => {
-      let price = product.price;
-      if (product.discount) {
-        product.price *= product.amount;
-        product.discount *= product.amount;
-        let descuento = (product.price * product.discount) / 100;
-        price -= descuento;
-      }
+  helpers = () => {
+    hbs.registerHelper('calculatePrice', (product: IProduct) => {
+      let price = product.price * product.amount;
+      let COP = new Intl.NumberFormat('en-US', {
+        currency: 'COP',
+        style: 'currency',
+      }).format(price);
+      return COP;
+    });
 
+    hbs.registerHelper('hasDiscount', (product: IProduct) => {
+      return product.discount;
+    });
+
+    hbs.registerHelper('existDiscounts', (products: IProduct[]) => {
+      return products.some((product) => product.discount);
+    });
+
+    hbs.registerHelper('calculateDiscount', (product: IProduct) => {
+      let precioOriginal = product.price;
+      let porcentajeDescuento = product.discount;
+      precioOriginal *= product.amount;
+      porcentajeDescuento *= product.amount;
+      let descuento = (precioOriginal * porcentajeDescuento) / 100;
+
+      let COP = new Intl.NumberFormat('en-US', {
+        currency: 'COP',
+        style: 'currency',
+      }).format(descuento);
+      return COP;
+    });
+
+    hbs.registerHelper('parseCurrency', (price) => {
       let COP = new Intl.NumberFormat('en-US', {
         currency: 'COP',
         style: 'currency',
