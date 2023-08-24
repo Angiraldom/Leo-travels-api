@@ -49,13 +49,13 @@ export class AuthService {
       data: {
         access_token: this.jwtService.sign(payload),
         user,
-        refresh_token: this.generateRefreshToken(payload)
+        refresh_token: this.generateRefreshToken(payload),
       },
     });
     return response;
   }
 
-  validateRefreshToken(refresh_token: string) {
+  async validateRefreshToken(refresh_token: string) {
     const isValid = this.jwtService.verify(refresh_token, {
       ignoreExpiration: false,
       secret: this.config.jwtSecretRefreshToken,
@@ -66,9 +66,9 @@ export class AuthService {
         tag: 'ErrorInvalidToken',
       });
     }
-    const user = this.jwtService.decode(refresh_token);
-    // Validar que debemos de responder, si es necesario el usuario o solo los dos tokens.
-    return this.generateJWT({ _id: user['_id'], role:  user['role'] });
+    const refreshTokenDecode = this.jwtService.decode(refresh_token);
+    const user = await this.userService.findUserById(refreshTokenDecode['sub']);
+    return this.generateJWT(user.data);
   }
   
 
