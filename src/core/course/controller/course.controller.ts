@@ -4,7 +4,7 @@ import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ModulesDto } from '../dto/moduls.dto';
-import { ClassDto, UpdateClassDto } from '../dto/class.dto';
+import { ClassDto } from '../dto/class.dto';
 import { IParamsIds } from '../interface/IParamsIds.interface';
 import { Public } from 'src/core/auth/decorators/public.decorator';
 

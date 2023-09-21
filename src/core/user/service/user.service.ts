@@ -13,7 +13,7 @@ import { ConfigType } from '@nestjs/config';
 
 import { IUser } from '../interface/IUser.interface';
 import { IRequestResponse } from './../../../shared/utils/interface/IRequestResponse.interface';
-import { AddUserDto, UpdateUserDto } from '../dto';
+import { UpdateUserDto } from '../dto';
 import { validateAction } from '../../../shared/function/validateAction.function';
 import { buildResponseSuccess } from '../../../shared/utils/utilities/Response.util';
 import { comparePassword, encrypt } from '../../../shared/function/encryptPassword.function';

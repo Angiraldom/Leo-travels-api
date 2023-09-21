@@ -29,5 +29,9 @@ export default registerAs('configuration', () => {
     jwtSecretRecoverPassword: process.env.JWT_SECRET_RECOVER_PASSWORD,
     urlLogin : process.env.URL_LOGIN,
     urlChangePassword : process.env.URL_CHANGE_PASSWORD,
+    facebook: {
+      accessToken: process.env.FACEBOOK_ACCESS_TOKEN,
+      pixelId: process.env.PIXEL_ID
+    }
   };
 });
