@@ -274,4 +274,17 @@ export class UserService {
       data: 'Actualizado exitosamente',
     });
   }
+
+  async sendEmailFreeClass(data) {
+    const configEmail = {
+      subject: 'Clase gratis',
+      from: 'Vilean',
+      to: data.correo,
+    };
+    return await this.emailService.sendMail(
+      configEmail,
+      data,
+      'free-class',
+    );
+  }
 }
