@@ -118,12 +118,4 @@ export class UserController {
     const user = req.user as IPayloadToken;
     return this.userService.updateClass(course, module, idClass, user.sub ,body);
   }
-
-  @Public()
-  @Post('clase-gratis')
-  async freeClassEmail(
-    @Body() data,
-  ) {
-    return await this.userService.sendEmailFreeClass(data);
-  }
 }

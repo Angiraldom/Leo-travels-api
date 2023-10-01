@@ -113,7 +113,7 @@ export class PaymentsService {
     const total = dataTransaction.data.transaction.amount_in_cents.toString();
     const data = {
       ...user,
-      urlLogin : this.config.urlLogin,
+      urlLogin : this.config.appUrls.urlLogin,
       products: [...dataTransaction.products],
       password: passwordUser,
       total: Number(total.slice(0, total.length - 2)),
