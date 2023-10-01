@@ -21,17 +21,20 @@ export default registerAs('configuration', () => {
     redis: {
       url: process.env.REDIS_URL,
       host: process.env.REDISHOST,
-      password:process.env.REDISPASSWORD,
+      password: process.env.REDISPASSWORD,
       port: process.env.REDISPORT,
-      user: process.env.REDISUSER
+      user: process.env.REDISUSER,
+    },
+    appUrls: {
+      urlLogin: process.env.URL_LOGIN,
+      urlChangePassword: process.env.URL_CHANGE_PASSWORD,
+      urlFreeClass: process.env.URL_FREE_CLASS
+    },
+    facebook: {
+      accessToken: process.env.FACEBOOK_ACCESS_TOKEN,
+      pixelId: process.env.PIXEL_ID,
     },
     jwtSecret: process.env.JWT_SECRET,
     jwtSecretRecoverPassword: process.env.JWT_SECRET_RECOVER_PASSWORD,
-    urlLogin : process.env.URL_LOGIN,
-    urlChangePassword : process.env.URL_CHANGE_PASSWORD,
-    facebook: {
-      accessToken: process.env.FACEBOOK_ACCESS_TOKEN,
-      pixelId: process.env.PIXEL_ID
-    }
   };
 });

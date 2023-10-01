@@ -152,7 +152,7 @@ export class UserService {
       });
     }
     const token = this.generateTokenPassword(user);
-    const urlLogin = this.config.urlChangePassword;
+    const urlLogin = this.config.appUrls.urlChangePassword;
     const data = {
       ...user,
       link: `${urlLogin}?token=${token}`,
@@ -273,18 +273,5 @@ export class UserService {
     return buildResponseSuccess({
       data: 'Actualizado exitosamente',
     });
-  }
-
-  async sendEmailFreeClass(data) {
-    const configEmail = {
-      subject: 'Clase gratis',
-      from: 'Vilean',
-      to: data.correo,
-    };
-    return await this.emailService.sendMail(
-      configEmail,
-      data,
-      'free-class',
-    );
   }
 }
