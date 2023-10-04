@@ -16,22 +16,11 @@ export class EmailService {
   ) {}
 
   createTransporter() {
-    // const transporter = nodemailer.createTransport({
-    //   host: 'smtp.ethereal.email',
-    //   port: 587,
-    //   auth: {
-    //     user: 'kaylie.beer@ethereal.email',
-    //     pass: 'PwEDU5SE1ZHSY3V7q4'
-    //   },
-    // });
-    // return transporter;
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
+      host: this.config.email.host,
+      port: +this.config.email.port,
       secure: true,
       auth: {
-        // user: 'johnatan.r259@gmail.com',
-        // pass: 'cdxcaicxvkbhtraz',
         user: this.config.email.username,
         pass: this.config.email.password,
       },
@@ -52,6 +41,7 @@ export class EmailService {
 
     const emailTemplate = await this.compile(templateName, data);
     const responseEmail = await transporter.sendMail({
+      sender: this.config.email.username,
       ...configMail,
       html: emailTemplate,
     });

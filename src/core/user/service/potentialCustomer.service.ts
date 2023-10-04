@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Model } from 'mongoose';
 
@@ -19,6 +19,17 @@ export class PotentialCustomerService {
   ) {}
 
   async sendEmailFreeClass(data) {
+    const emailExist = await this.validateEmailExist(data.email);
+
+    if (emailExist) {
+      throw new BadRequestException(
+        {
+          customMessage: "El email ya fue enviado.",
+          tag: 'ErrorEmailExist',
+        }
+      );
+    }
+
     await this.saveClient(data);
     
     data['urlFreeClass'] = this.config.appUrls.urlFreeClass;
@@ -41,5 +52,9 @@ export class PotentialCustomerService {
     return buildResponseSuccess({
       data: await this.clientModel.find().sort({ createdAt: 1 }),
     });
+  }
+
+  async validateEmailExist(email: string) {
+    return await this.clientModel.findOne({ email });;
   }
 }

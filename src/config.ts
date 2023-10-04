@@ -11,6 +11,8 @@ export default registerAs('configuration', () => {
     email: {
       username: process.env.EMAIL,
       password: process.env.EMAIL_PASSWORD,
+      port: process.env.EMAIL_PORT,
+      host: process.env.EMAIL_HOST
     },
     aws: {
       name: process.env.BUCKET_NAME,
