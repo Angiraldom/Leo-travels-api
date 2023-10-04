@@ -30,7 +30,7 @@ export class PotentialCustomerService {
       );
     }
 
-    // await this.saveClient(data);
+    await this.saveClient(data);
     
     data['urlFreeClass'] = this.config.appUrls.urlFreeClass;
 
