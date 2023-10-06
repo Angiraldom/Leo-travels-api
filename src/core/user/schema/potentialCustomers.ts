@@ -13,7 +13,7 @@ export class PotentialCustomer extends Document {
   @Prop()
   autoriza: boolean;
 
-  @Prop({ type: Date, default: Date.now() })
+  @Prop({ type: Date, default: Date.now })
   createdAt: Date;
 }
 

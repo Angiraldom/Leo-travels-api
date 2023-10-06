@@ -43,7 +43,6 @@ export class PotentialCustomerService {
   }
 
   async saveClient(data) {
-    this.clientModel
     const NEW_CLIENT = new this.clientModel(data);
     await NEW_CLIENT.save();
   }
