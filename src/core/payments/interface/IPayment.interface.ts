@@ -13,7 +13,7 @@ type GATEWAY_TYPE = 'epayco' | 'wompy';
 export interface ITransaction {
   gatewayData: IEpayco | IWompi;
   gateway: GATEWAY_TYPE;
-  orden: number | string;
+  orden: string;
   reference: string;
   fecha: Date;
   total: number;
@@ -26,7 +26,7 @@ export interface ITransaction {
     email: string;
     phone: string;
   };
-  shippingAdress: {
+  shippingAdress?: {
     country: string;
     department: string;
     city: string;

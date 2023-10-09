@@ -157,23 +157,26 @@ export class PaymentsService {
         typeDocument: payment.data.transaction.customer_data.legal_id_type,
         numberDocument: payment.data.transaction.customer_data.legal_id,
         phone: payment.data.transaction.customer_data.phone_number,
-      },
-      shippingAdress: {
+      }
+    };
+    if (payment.data.transaction.shipping_address) {
+      transactionObject.shippingAdress = {
         country: payment.data.transaction.shipping_address.country,
         department: payment.data.transaction.shipping_address.region,
         city: payment.data.transaction.shipping_address.city,
         adress: payment.data.transaction.shipping_address.address_line_1,
         adressEspecification: payment.data.transaction.shipping_address.address_line_2
-      },
-    };
-    this.validate(transactionObject);
+      };
+    }
+    return await this.validate(transactionObject);
   }
 
   async createObjectEpayco(payment: IEpayco) {
+    // HACER PRUEBA DE QUE PASA CUANDO NO SE ENVIA LA INFORMACION DEL ENVIO.
     const transactionObject: ITransaction = {
       gatewayData: payment,
       gateway: 'epayco',
-      orden: payment.x_ref_payco,
+      orden: payment.x_ref_payco.toString(),
       reference: payment.x_id_invoice,
       fecha: new Date(payment.x_transaction_date),
       total: payment.x_amount,
@@ -194,7 +197,7 @@ export class PaymentsService {
           'Podemos agregar las especificacion en uno de los extras.',
       },
     };
-    this.validate(transactionObject);
+    return await this.validate(transactionObject);
   }
 
 
@@ -226,12 +229,16 @@ export class PaymentsService {
         if (addNewUser.data) {
           await this.sendMailCourse(data, newUser.password);
         }
-        await this.createPayment(data);
-        return response.status(201);
+        await this.createPaymentRemoveProductsRedis(data);
+        return;
       }
     }
     await this.sendMailProducts(data);
+    await this.createPaymentRemoveProductsRedis(data);
+  }
+
+  async createPaymentRemoveProductsRedis(data: ITransaction) {
     await this.createPayment(data);
-    this.redisService.deleteRedisReference(data.reference);
+    await this.redisService.deleteRedisReference(data.reference);
   }
 }
