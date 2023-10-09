@@ -57,14 +57,6 @@ export class PaymentsService {
     return pass;
   }
 
-  getTotalValue(products: any[]) {
-    const total: number = products.reduce((value, item) => {
-      const price = item.price * item.amount;
-      return (value = price + value);
-    }, 0);
-    return total;
-  }
-
   /**
    * Envia el email al usuario cuando compro un curso.
    */
@@ -74,11 +66,12 @@ export class PaymentsService {
       urlLogin: this.config.appUrls.urlLogin,
       products: [...dataTransaction.products],
       password: passwordUser,
-      total: this.getTotalValue(dataTransaction.products),
+      total: dataTransaction.total,
       reference: dataTransaction.reference,
+      shippingPrice: dataTransaction.shippingPrice,
     };
 
-    return await this.sendClientMail('email-course', data, dataTransaction.user.email);
+    return await this.sendClientMail('course-email', data, dataTransaction.user.email);
   }
 
    /**
@@ -88,11 +81,13 @@ export class PaymentsService {
     const data = {
       email: dataTransaction.user.email,
       products: [...dataTransaction.products],
-      total: this.getTotalValue(dataTransaction.products),
+      total: dataTransaction.total,
       reference: dataTransaction.reference,
+      name: dataTransaction.user.name,
+      shippingPrice: dataTransaction.shippingPrice
     };
 
-    return await this.sendClientMail('email-products', data, dataTransaction.user.email);
+    return await this.sendClientMail('products-email', data, dataTransaction.user.email);
   }
 
   /**
@@ -147,13 +142,14 @@ export class PaymentsService {
   }
 
   async createObjectWompi(payment: IWompi) {
+    const total = payment.data.transaction.amount_in_cents.toString();
     const transactionObject: ITransaction = {
       gatewayData: payment,
       gateway: 'wompy',
       orden: payment.data.transaction.id,
       reference: payment.data.transaction.reference,
       fecha: payment.data.transaction.created_at,
-      total: payment.data.transaction.amount_in_cents,
+      total: Number(total.slice(0, total.length - 2)),
       products: [],
       user: {
         name: payment.data.transaction.customer_data.full_name,
@@ -208,6 +204,7 @@ export class PaymentsService {
     );
 
     data.products = JSON.parse(productosComprados).products;
+    data.shippingPrice = JSON.parse(productosComprados).shippingPrice;
 
     const hasModules = this.validateRedisProduct(data.products);
     if (hasModules) {
@@ -229,6 +226,7 @@ export class PaymentsService {
         if (addNewUser.data) {
           await this.sendMailCourse(data, newUser.password);
         }
+        await this.createPayment(data);
         return response.status(201);
       }
     }

@@ -18,6 +18,7 @@ export interface ITransaction {
   fecha: Date;
   total: number;
   products: IProduct[];
+  shippingPrice?: number;
   user: {
     name: string;
     numberDocument: string;
