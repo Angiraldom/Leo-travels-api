@@ -1,3 +1,4 @@
 export const enviroments = {
-    dev: '.env',
+    dev: 'dev.env',
+    prod: 'prod.env'
 };
