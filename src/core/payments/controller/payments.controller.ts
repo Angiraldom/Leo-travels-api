@@ -81,4 +81,10 @@ export class PaymentsController {
       body.shippingPrice,
     );
   }
+
+  @Public()
+  @Get('wompiTransactions')
+  wompiTransactions() {
+    return this.paymentsService.validateTransactionsWompi();
+  }
 }

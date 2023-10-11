@@ -71,10 +71,14 @@ export class PaymentsService {
       shippingPrice: dataTransaction.shippingPrice,
     };
 
-    return await this.sendClientMail('course-email', data, dataTransaction.user.email);
+    return await this.sendClientMail(
+      'course-email',
+      data,
+      dataTransaction.user.email,
+    );
   }
 
-   /**
+  /**
    * Envia el email al usuario cuando compro solamente productos.
    */
   async sendMailProducts(dataTransaction: ITransaction) {
@@ -84,10 +88,14 @@ export class PaymentsService {
       total: dataTransaction.total,
       reference: dataTransaction.reference,
       name: dataTransaction.user.name,
-      shippingPrice: dataTransaction.shippingPrice
+      shippingPrice: dataTransaction.shippingPrice,
     };
 
-    return await this.sendClientMail('products-email', data, dataTransaction.user.email);
+    return await this.sendClientMail(
+      'products-email',
+      data,
+      dataTransaction.user.email,
+    );
   }
 
   /**
@@ -157,7 +165,7 @@ export class PaymentsService {
         typeDocument: payment.data.transaction.customer_data.legal_id_type,
         numberDocument: payment.data.transaction.customer_data.legal_id,
         phone: payment.data.transaction.customer_data.phone_number,
-      }
+      },
     };
     if (payment.data.transaction.shipping_address) {
       transactionObject.shippingAdress = {
@@ -165,7 +173,8 @@ export class PaymentsService {
         department: payment.data.transaction.shipping_address.region,
         city: payment.data.transaction.shipping_address.city,
         adress: payment.data.transaction.shipping_address.address_line_1,
-        adressEspecification: payment.data.transaction.shipping_address.address_line_2
+        adressEspecification:
+          payment.data.transaction.shipping_address.address_line_2,
       };
     }
     return await this.validate(transactionObject);
@@ -200,20 +209,15 @@ export class PaymentsService {
     return await this.validate(transactionObject);
   }
 
-
   async validate(data: ITransaction) {
-    const productosComprados = await this.redisService.getData(
-      data.reference,
-    );
+    const productosComprados = await this.redisService.getData(data.reference);
 
     data.products = JSON.parse(productosComprados).products;
     data.shippingPrice = JSON.parse(productosComprados).shippingPrice;
 
     const hasModules = this.validateRedisProduct(data.products);
     if (hasModules) {
-      const hasUser = await this.userService.findUserByEmail(
-        data.user.email,
-      );
+      const hasUser = await this.userService.findUserByEmail(data.user.email);
       if (!hasUser) {
         const newUser: IUser = {
           name: data.user.name,
@@ -240,5 +244,34 @@ export class PaymentsService {
   async createPaymentRemoveProductsRedis(data: ITransaction) {
     await this.createPayment(data);
     await this.redisService.deleteRedisReference(data.reference);
+  }
+
+  async validateTransactionsWompi() {
+    const fechaHoy = new Date();
+    fechaHoy.setHours(0, 0, 0, 0); // Establecer la hora a las 00:00:00 del día actual
+
+    const resultado = await this.invoiceModel
+      .aggregate([
+        {
+          $match: {
+            fecha: {
+              $gte: fechaHoy,
+              $lt: new Date(fechaHoy.getTime() + 24 * 60 * 60 * 1000), // Hasta las 23:59:59
+            },
+            gateway: 'wompy'
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$total' },
+          },
+        },
+      ])
+      .exec();
+
+    return buildResponseSuccess({
+      data: resultado[0].total,
+    });
   }
 }
