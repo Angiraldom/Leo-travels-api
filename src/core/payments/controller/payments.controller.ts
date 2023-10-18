@@ -9,7 +9,10 @@ import {
   UseFilters,
   UseGuards,
   Query,
+  Res,
+  HttpStatus,
 } from '@nestjs/common';
+import { Response } from 'express';
 
 import { PaymentsService } from '../service/payments.service';
 import { RedisService } from 'src/shared/service/redis.service';
@@ -17,6 +20,7 @@ import { IWompi } from '../interface/IResponseWompi.interface';
 import { Public } from 'src/core/auth/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
+import { IEpayco } from '../interface/IResponseEpayco.interface';
 
 @UseFilters(HttpExceptionFilter)
 @UseGuards(JwtAuthGuard)
@@ -30,15 +34,23 @@ export class PaymentsController {
   @Public()
   @Get('notification-epayco')
   @HttpCode(200)
-  wompiNotificationEpaycoGet(@Query() query) {
-    console.log(query);
+  async wompiNotificationEpaycoGet(@Query() data: IEpayco, @Res() response: Response) {
+    if (data.x_respuesta !== 'Aceptada') {
+      return response.status(HttpStatus.OK).send('El estado de la transacción no es aprobado');
+    }
+    await this.paymentsService.createObjectEpayco(data);
+    return response.status(HttpStatus.OK).send('Compra realizada con exito.');
   }
 
   @Public()
   @Post('notification')
   @HttpCode(200)
-  wompiNotification(@Body() data: IWompi) {
-    return this.paymentsService.validateWompi(data);
+  async wompiNotification(@Body() data: IWompi, @Res() response: Response) {
+    if (data.data.transaction.status !== 'APPROVED') {
+      return response.status(HttpStatus.OK).send('El estado de la transacción no es aprobado');
+    }
+    await this.paymentsService.createObjectWompi(data);
+    return response.status(HttpStatus.OK).send('Compra realizada con exito.');
   }
 
   @Get('getPayments')
@@ -68,5 +80,11 @@ export class PaymentsController {
       body.products,
       body.shippingPrice,
     );
+  }
+
+  @Public()
+  @Get('wompiTransactions')
+  wompiTransactions() {
+    return this.paymentsService.validateTransactionsWompi();
   }
 }

@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { response } from 'express';
@@ -15,17 +15,21 @@ import { IProduct } from 'src/core/product/interface/IProduct.interface';
 import { IUser } from 'src/core/user/interface/IUser.interface';
 import configuration from '../../../config';
 import { CourseService } from 'src/core/course/service/course.service';
+import { IEpayco } from '../interface/IResponseEpayco.interface';
+import { ITransaction } from '../interface/IPayment.interface';
 
 @Injectable()
 export class PaymentsService {
-  constructor(@InjectModel(Payment.name) private readonly invoiceModel: Model<Payment>,
-  @Inject(configuration.KEY) private config: ConfigType<typeof configuration>,
+  constructor(
+    @InjectModel(Payment.name) private readonly invoiceModel: Model<Payment>,
+    @Inject(configuration.KEY) private config: ConfigType<typeof configuration>,
     private redisService: RedisService,
     private userService: UserService,
     private emailService: EmailService,
-    private courseService: CourseService) { }
+    private courseService: CourseService,
+  ) {}
 
-  async createPayment(createPayment: IWompi) {
+  async createPayment(createPayment: ITransaction) {
     const NEW_INVOICE = new this.invoiceModel(createPayment);
     await NEW_INVOICE.save();
   }
@@ -36,45 +40,9 @@ export class PaymentsService {
     });
   }
 
-  async validateWompi(data: IWompi) {
-
-    if (data.data.transaction.status != "APPROVED") {
-      return response.status(HttpStatus.OK);
-    }
-    const productsRedis = await this.redisService.getData(data.data.transaction.reference);
-
-    data.products = JSON.parse(productsRedis).products;
-    data.shippingPrice = JSON.parse(productsRedis).shippingPrice;
-
-    const hasModules = this.validateRedisProduct(data.products);
-    if (hasModules) {
-      const hasUser = await this.userService.findUserByEmail(data.data.transaction.customer_email);
-      if (!hasUser) {
-        const newUser: IUser = {
-          name: data.data.transaction.customer_data.full_name,
-          password: this.generatePasswordRandom(),
-          email: data.data.transaction.customer_email,
-          typeDocument: data.data.transaction.customer_data.legal_id_type,
-          numberDocument: data.data.transaction.customer_data.legal_id,
-          role: "Cliente",
-          phone: data.data.transaction.customer_data.phone_number,
-          courses: await this.getCourses(data.products)
-        };
-        const addNewUser = await this.userService.addUser(newUser);
-        if (addNewUser.data) {
-          await this.sendMailProducts(data, newUser.password);
-        }
-        await this.createPayment(data);
-        return response.status(201);
-      }
-    }
-    await this.sendMailProductsIndependent(data);
-    await this.createPayment(data);
-    this.redisService.deleteRedisReference(data.data.transaction.reference);
-  }
-
   generatePasswordRandom() {
-    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const caracteres =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const caracteresLength = caracteres.length;
     let pass = '';
 
@@ -89,48 +57,63 @@ export class PaymentsService {
     return pass;
   }
 
-  getTotalValue(products: any[]) {
-    const total: number = products.reduce((value, item) => {
-      const price = item.price * item.amount;
-      return value = price + value;
-    }, 0)
-    return total;
-  }
-
   /**
-   * Send course email.
-   * @param dataTransaction Data about the payment.
-   * @param passwordUser Password for the new user. 
+   * Envia el email al usuario cuando compro un curso.
    */
-  async sendMailProducts(dataTransaction: IWompi, passwordUser?: string) {
-    const user = await this.userService.findUserByEmail(dataTransaction.data.transaction.customer_email);
-    if (!user) {
-      throw new NotFoundException({
-        customMessage: 'El email no existe',
-        tag: 'ErrorEmailNotFound',
-      });
-    }
-    const total = dataTransaction.data.transaction.amount_in_cents.toString();
+  async sendMailCourse(dataTransaction: ITransaction, passwordUser?: string) {
     const data = {
-      ...user,
-      urlLogin : this.config.appUrls.urlLogin,
+      name: dataTransaction.user.name,
+      urlLogin: this.config.appUrls.urlLogin,
       products: [...dataTransaction.products],
       password: passwordUser,
-      total: Number(total.slice(0, total.length - 2)),
-      transaction: dataTransaction.data,
+      total: dataTransaction.total,
+      reference: dataTransaction.reference,
       shippingPrice: dataTransaction.shippingPrice,
-      name: dataTransaction.data.transaction.customer_data.full_name,
     };
 
+    return await this.sendClientMail(
+      'course-email',
+      data,
+      dataTransaction.user.email,
+    );
+  }
+
+  /**
+   * Envia el email al usuario cuando compro solamente productos.
+   */
+  async sendMailProducts(dataTransaction: ITransaction) {
+    const data = {
+      email: dataTransaction.user.email,
+      products: [...dataTransaction.products],
+      total: dataTransaction.total,
+      reference: dataTransaction.reference,
+      name: dataTransaction.user.name,
+      shippingPrice: dataTransaction.shippingPrice,
+    };
+
+    return await this.sendClientMail(
+      'products-email',
+      data,
+      dataTransaction.user.email,
+    );
+  }
+
+  /**
+   * Envia el email al cliente que hizo una compra.
+   * @param templateName Nombre de la plantilla del correo.
+   * @param data Información necesaria para el envio del email.
+   * @param email Email al que se va hacer el envio.
+   */
+  async sendClientMail(templateName: string, data, email: string) {
     const configEmail = {
       subject: '¡PEDIDO CONFIRMADO! 🥳💙',
       from: 'Vilean',
-      to: data.email,
+      to: email,
     };
     const res = await this.emailService.sendMail(
       configEmail,
       data,
-      'course-email',
+      templateName,
     );
     return buildResponseSuccess({
       data: res ?? 'The mail was send successfully',
@@ -138,46 +121,25 @@ export class PaymentsService {
   }
 
   /**
-   * Send mail products and travel kit.
-   * @param dataTransaction Data about the payment.
+   * Valida si en los productos comprados uno de estos es un curso.
+   * @param data Productos comprados
    */
-  async sendMailProductsIndependent(dataTransaction: IWompi) {
-    const total = dataTransaction.data.transaction.amount_in_cents.toString();
-    const data = {
-      email: dataTransaction.data.transaction.customer_email,
-      products: [...dataTransaction.products],
-      total: Number(total.slice(0, total.length - 2)),
-      transaction: dataTransaction.data,
-      name: dataTransaction.data.transaction.customer_data.full_name,
-      shippingPrice: dataTransaction.shippingPrice
-    };
-
-    const configEmail = {
-      subject: '¡PEDIDO CONFIRMADO! 🥳💙',
-      from: 'Vilean',
-      to: data.email,
-    };
-    const res = await this.emailService.sendMail(
-      configEmail,
-      data,
-      'products-email',
-    );
-    return buildResponseSuccess({
-      data: res ?? 'The mail was send successfully',
-    });
-  }
-
   validateRedisProduct(data: IProduct[]) {
-    return data.some((element) => element.modules)
+    return data.some((element) => element.modules);
   }
 
+  /**
+   * Consulta todos los cursos comprados por el usario, para añadirlos a el.
+   * @param data Productos comprados.
+   * @returns Devuelve el objeto de base de datos de cada curso.
+   */
   async getCourses(data?: IProduct[]) {
     const courses = data.filter((product) => product.modules);
 
     if (!courses) {
       return [];
     }
-    
+
     const coursesPromises = courses.map(async (file) => {
       return await this.courseService.findCourseAndAddField(file._id);
     });
@@ -185,5 +147,137 @@ export class PaymentsService {
     const responseCourses = await Promise.all(coursesPromises);
 
     return responseCourses.filter((item) => item);
+  }
+
+  async createObjectWompi(payment: IWompi) {
+    const total = payment.data.transaction.amount_in_cents.toString();
+    const transactionObject: ITransaction = {
+      gatewayData: payment,
+      gateway: 'wompy',
+      orden: payment.data.transaction.id,
+      reference: payment.data.transaction.reference,
+      fecha: payment.data.transaction.created_at,
+      total: Number(total.slice(0, total.length - 2)),
+      products: [],
+      user: {
+        name: payment.data.transaction.customer_data.full_name,
+        email: payment.data.transaction.customer_email,
+        typeDocument: payment.data.transaction.customer_data.legal_id_type,
+        numberDocument: payment.data.transaction.customer_data.legal_id,
+        phone: payment.data.transaction.customer_data.phone_number,
+      },
+    };
+    if (payment.data.transaction.shipping_address) {
+      transactionObject.shippingAdress = {
+        country: payment.data.transaction.shipping_address.country,
+        department: payment.data.transaction.shipping_address.region,
+        city: payment.data.transaction.shipping_address.city,
+        adress: payment.data.transaction.shipping_address.address_line_1,
+        adressEspecification:
+          payment.data.transaction.shipping_address.address_line_2,
+      };
+    }
+    return await this.validate(transactionObject);
+  }
+
+  async createObjectEpayco(payment: IEpayco) {
+    const customerData = JSON.parse(payment.x_extra1);
+    const transactionObject: ITransaction = {
+      gatewayData: payment,
+      gateway: 'epayco',
+      orden: payment.x_ref_payco.toString(),
+      reference: payment.x_id_invoice,
+      fecha: new Date(payment.x_transaction_date),
+      total: payment.x_amount,
+      products: [],
+      user: {
+        name: customerData.name,
+        lastName: customerData.lastName,
+        numberDocument: customerData.legalId,
+        typeDocument: customerData.legalIdType,
+        email: customerData.email,
+        phone: customerData.phoneNumberPrefix + ' ' + customerData.phoneNumber,
+
+      }
+    };
+
+    if (payment.x_extra2) {
+      const shippingAdressData = JSON.parse(payment.x_extra2);
+      transactionObject.shippingAdress = {
+        country: shippingAdressData.country,
+        department: shippingAdressData.region,
+        city: shippingAdressData.city,
+        adress: shippingAdressData.addressLine1,
+        adressEspecification: shippingAdressData.addressLine2
+      };
+    }
+
+    return await this.validate(transactionObject);
+  }
+
+  async validate(data: ITransaction) {
+    const productosComprados = await this.redisService.getData(data.reference);
+
+    data.products = JSON.parse(productosComprados).products;
+    data.shippingPrice = JSON.parse(productosComprados).shippingPrice;
+
+    const hasModules = this.validateRedisProduct(data.products);
+    if (hasModules) {
+      const hasUser = await this.userService.findUserByEmail(data.user.email);
+      if (!hasUser) {
+        const newUser: IUser = {
+          name: data.user.name,
+          password: this.generatePasswordRandom(),
+          email: data.user.email,
+          typeDocument: data.user.typeDocument,
+          numberDocument: data.user.numberDocument,
+          role: 'Cliente',
+          phone: data.user.phone,
+          courses: await this.getCourses(data.products),
+        };
+        const addNewUser = await this.userService.addUser(newUser);
+        if (addNewUser.data) {
+          await this.sendMailCourse(data, newUser.password);
+        }
+        await this.createPaymentRemoveProductsRedis(data);
+        return;
+      }
+    }
+    await this.sendMailProducts(data);
+    await this.createPaymentRemoveProductsRedis(data);
+  }
+
+  async createPaymentRemoveProductsRedis(data: ITransaction) {
+    await this.createPayment(data);
+    await this.redisService.deleteRedisReference(data.reference);
+  }
+
+  async validateTransactionsWompi() {
+    const fechaHoy = new Date();
+    fechaHoy.setHours(0, 0, 0, 0); // Establecer la hora a las 00:00:00 del día actual
+
+    const resultado = await this.invoiceModel
+      .aggregate([
+        {
+          $match: {
+            fecha: {
+              $gte: fechaHoy,
+              $lt: new Date(fechaHoy.getTime() + 24 * 60 * 60 * 1000), // Hasta las 23:59:59
+            },
+            gateway: 'wompy'
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$total' },
+          },
+        },
+      ])
+      .exec();
+
+    return buildResponseSuccess({
+      data: resultado[0].total,
+    });
   }
 }
