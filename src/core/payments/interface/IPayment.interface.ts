@@ -20,6 +20,7 @@ export interface ITransaction {
   products: IProduct[];
   shippingPrice?: number;
   user: {
+    lastName?: string;
     name: string;
     numberDocument: string;
     typeDocument: string;

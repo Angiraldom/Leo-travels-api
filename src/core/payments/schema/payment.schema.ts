@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { IProduct } from 'src/core/product/interface/IProduct.interface';
-import { Data, Signature } from './wompi.schema';
 import { IEpayco } from '../interface/IResponseEpayco.interface';
 import { IWompi } from '../interface/IResponseWompi.interface';
 

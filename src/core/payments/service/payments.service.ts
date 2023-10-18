@@ -181,7 +181,7 @@ export class PaymentsService {
   }
 
   async createObjectEpayco(payment: IEpayco) {
-    // HACER PRUEBA DE QUE PASA CUANDO NO SE ENVIA LA INFORMACION DEL ENVIO.
+    const customerData = JSON.parse(payment.x_extra1);
     const transactionObject: ITransaction = {
       gatewayData: payment,
       gateway: 'epayco',
@@ -191,21 +191,27 @@ export class PaymentsService {
       total: payment.x_amount,
       products: [],
       user: {
-        name: payment.x_customer_name + payment.x_customer_lastname,
-        numberDocument: payment.x_customer_document,
-        typeDocument: payment.x_customer_doctype,
-        email: payment.x_customer_email,
-        phone: payment.x_customer_phone,
-      },
-      shippingAdress: {
-        country: payment.x_customer_country,
-        department: '',
-        city: payment.x_customer_city,
-        adress: payment.x_customer_address,
-        adressEspecification:
-          'Podemos agregar las especificacion en uno de los extras.',
-      },
+        name: customerData.name,
+        lastName: customerData.lastName,
+        numberDocument: customerData.legalId,
+        typeDocument: customerData.legalIdType,
+        email: customerData.email,
+        phone: customerData.phoneNumberPrefix + ' ' + customerData.phoneNumber,
+
+      }
     };
+
+    if (payment.x_extra2) {
+      const shippingAdressData = JSON.parse(payment.x_extra2);
+      transactionObject.shippingAdress = {
+        country: shippingAdressData.country,
+        department: shippingAdressData.region,
+        city: shippingAdressData.city,
+        adress: shippingAdressData.addressLine1,
+        adressEspecification: shippingAdressData.addressLine2
+      };
+    }
+
     return await this.validate(transactionObject);
   }
 
