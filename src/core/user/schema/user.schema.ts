@@ -35,8 +35,8 @@ export class User extends Document {
   @Prop({ type: Number })
   codePostal: number;
 
-  @Prop({ type: Number })
-  phone: number;
+  @Prop({ type: String })
+  phone: string;
 
   @Prop({ type: Boolean, default: true })
   status: boolean;
