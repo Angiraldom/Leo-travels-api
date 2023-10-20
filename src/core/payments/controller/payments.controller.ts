@@ -32,7 +32,7 @@ export class PaymentsController {
   ) {}
 
   @Public()
-  @Get('notification-epayco')
+  @Post('notification-epayco')
   @HttpCode(200)
   async wompiNotificationEpaycoGet(@Query() data: IEpayco, @Res() response: Response) {
     if (data.x_respuesta !== 'Aceptada') {
