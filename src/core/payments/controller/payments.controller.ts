@@ -34,12 +34,12 @@ export class PaymentsController {
   @Public()
   @Post('notification-epayco')
   @HttpCode(200)
-  async wompiNotificationEpaycoGet(@Query() data: IEpayco, @Res() response: Response) {
+  async wompiNotificationEpaycoGet(@Query() data: IEpayco) {
     if (data.x_respuesta !== 'Aceptada') {
-      return response.status(HttpStatus.OK).send('El estado de la transacción no es aprobado');
+      return 'El estado de la transacción no es aprobado';
     }
     await this.paymentsService.createObjectEpayco(data);
-    return response.status(HttpStatus.OK).send('Compra realizada con exito.');
+    return 'Compra realizada con exito.';
   }
 
   @Public()
