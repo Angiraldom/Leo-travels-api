@@ -22,7 +22,7 @@ import { JwtAuthGuard } from 'src/core/auth/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { IEpayco } from '../interface/IResponseEpayco.interface';
 
-@UseFilters(HttpExceptionFilter)
+// @UseFilters(HttpExceptionFilter)
 @UseGuards(JwtAuthGuard)
 @Controller('payments')
 export class PaymentsController {
@@ -32,14 +32,31 @@ export class PaymentsController {
   ) {}
 
   @Public()
+  @Get('notification-epayco')
+  @HttpCode(200)
+  async wompiNotificationEpaycoGet(@Query() data) {
+    console.log(data);
+    console.log('uno');
+
+    // if (data.x_respuesta !== 'Aceptada') {
+    //   return response.status(HttpStatus.OK).send('El estado de la transacción no es aprobado');
+    // }
+    // await this.paymentsService.createObjectEpayco(data);
+    // return response.status(HttpStatus.OK).send('Compra realizada con exito.');
+  }
+
+  @Public()
   @Post('notification-epayco')
   @HttpCode(200)
-  async wompiNotificationEpaycoGet(@Query() data: IEpayco, @Res() response: Response) {
-    if (data.x_respuesta !== 'Aceptada') {
-      return response.status(HttpStatus.OK).send('El estado de la transacción no es aprobado');
-    }
-    await this.paymentsService.createObjectEpayco(data);
-    return response.status(HttpStatus.OK).send('Compra realizada con exito.');
+  async wompiNotificationEpaycoGetDos(@Query() data) {
+    console.log(data);
+    console.log('dos');
+
+    // if (data.x_respuesta !== 'Aceptada') {
+    //   return response.status(HttpStatus.OK).send('El estado de la transacción no es aprobado');
+    // }
+    // await this.paymentsService.createObjectEpayco(data);
+    // return response.status(HttpStatus.OK).send('Compra realizada con exito.');
   }
 
   @Public()
