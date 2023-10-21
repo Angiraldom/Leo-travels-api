@@ -15,6 +15,11 @@ export class EmailService {
     @Inject(configuration.KEY) private config: ConfigType<typeof configuration>,
   ) {}
 
+    typeCurrency: Intl.NumberFormatOptions = {
+      currency: 'USD',
+      style: "currency"
+    };
+
   createTransporter() {
     const transporter = nodemailer.createTransport({
       host: this.config.email.host,
@@ -59,22 +64,16 @@ export class EmailService {
   }
 
   parseIntToCurrency() {
-    hbs.registerHelper('parseCurrency', (price) => {
-      let COP = new Intl.NumberFormat('en-US', {
-        currency: 'COP',
-        style: 'currency',
-      }).format(price);
+    hbs.registerHelper('parseCurrency', (price = 0) => {
+      let COP = new Intl.NumberFormat('en-US', this.typeCurrency).format(price);
       return COP;
     });
   }
 
   helpers = () => {
     hbs.registerHelper('calculatePrice', (product: IProduct) => {
-      let price = product.price * product.amount;
-      let COP = new Intl.NumberFormat('en-US', {
-        currency: 'COP',
-        style: 'currency',
-      }).format(price);
+      let price = product.price * product.amount || 0;
+      let COP = new Intl.NumberFormat('en-US', this.typeCurrency).format(price);
       return COP;
     });
 
@@ -88,20 +87,14 @@ export class EmailService {
 
     hbs.registerHelper('calculateDiscount', (product: IProduct) => {
       const descuento = (product.price * product.discount) / 100;
-      const total = descuento * product.amount;
+      const total = descuento * product.amount || 0;
 
-      let COP = new Intl.NumberFormat('en-US', {
-        currency: 'COP',
-        style: 'currency',
-      }).format(total);
+      let COP = new Intl.NumberFormat('en-US', this.typeCurrency).format(total);
       return COP;
     });
 
-    hbs.registerHelper('parseCurrency', (price) => {
-      let COP = new Intl.NumberFormat('en-US', {
-        currency: 'COP',
-        style: 'currency',
-      }).format(price);
+    hbs.registerHelper('parseCurrency', (price = 0) => {
+      let COP = new Intl.NumberFormat('en-US', this.typeCurrency).format(price);
       return COP;
     });
   }
