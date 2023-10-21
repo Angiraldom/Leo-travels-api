@@ -452,7 +452,7 @@
                                       <td style="padding:5px 0;Margin:0" width="20%" align="left">
                                         <p
                                           style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'open sans', 'helvetica neue', helvetica, arial, sans-serif;line-height:24px;color:#333333;font-size:16px">
-                                          {{calculatePrice this}}</p>
+                                          US {{calculatePrice this}}</p>
                                       </td>
                                     </tr>
                                     {{/each}}
@@ -473,7 +473,7 @@
                                       <td style="padding:5px 0;Margin:0" width="20%" align="left">
                                         <p
                                           style="font-weight: bold; Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'open sans', 'helvetica neue', helvetica, arial, sans-serif;line-height:24px;color:#333333;font-size:16px">
-                                          {{parseCurrency shippingPrice}}</p>
+                                          US {{parseCurrency shippingPrice}}</p>
                                       </td>
                                     </tr>
                                     <tr style="border-collapse:collapse">
@@ -490,7 +490,7 @@
                                         {{#if (hasDiscount this)}}
                                         <p
                                           style="font-weight: bold; Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'open sans', 'helvetica neue', helvetica, arial, sans-serif;line-height:24px;color:#333333;font-size:16px">
-                                          <strong>{{calculateDiscount this}}</strong></p>
+                                          <strong>US {{calculateDiscount this}}</strong></p>
                                         {{/if}}
                                         {{/each}}
 
@@ -536,7 +536,7 @@
                                       <td width="20%" style="padding:0;Margin:0">
                                         <h4
                                           style="Margin:0;line-height:120%;mso-line-height-rule:exactly;font-family:'open sans', 'helvetica neue', helvetica, arial, sans-serif">
-                                          {{parseCurrency total}}</h4>
+                                          US {{parseCurrency total}}</h4>
                                       </td>
                                     </tr>
                                   </table>

@@ -63,13 +63,6 @@ export class EmailService {
     return hbs.compile(html, { strict: false })(data);
   }
 
-  parseIntToCurrency() {
-    hbs.registerHelper('parseCurrency', (price = 0) => {
-      let COP = new Intl.NumberFormat('en-US', this.typeCurrency).format(price);
-      return COP;
-    });
-  }
-
   helpers = () => {
     hbs.registerHelper('calculatePrice', (product: IProduct) => {
       let price = product.price * product.amount || 0;
