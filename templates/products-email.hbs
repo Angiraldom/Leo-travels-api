@@ -889,7 +889,7 @@ END OF IMPORTANT
                                                       {{name}}</p>
                                                   </td>
                                                   <td style="padding: 5px 0" width="20%" align="left">
-                                                    <p>{{calculatePrice this}}</p>
+                                                    <p>US {{calculatePrice this}}</p>
                                                   </td>
                                                 </tr>
                                                 {{/each}}
@@ -907,7 +907,7 @@ END OF IMPORTANT
                                                     <p><strong>Envío</strong></p>
                                                   </td>
                                                   <td style="padding: 5px 0" width="20%" align="left">
-                                                    <p>{{parseCurrency shippingPrice}}
+                                                    <p>US {{parseCurrency shippingPrice}}
                                                   </td>
                                                   </p>
                                                 </tr>
@@ -921,7 +921,7 @@ END OF IMPORTANT
 
                                                       {{#each products}}
                                                         {{#if (hasDiscount this)}}
-                                                          <p><strong>{{calculateDiscount this}}</strong></p>
+                                                          <p><strong>US {{calculateDiscount this}}</strong></p>
                                                         {{/if}}
                                                       {{/each}}
 
@@ -962,7 +962,7 @@ END OF IMPORTANT
                                                     <p> <strong>TOTAL</strong> </p>
                                                   </td>
                                                   <td width="20%">
-                                                    <p> <strong>{{parseCurrency total}}</strong>
+                                                    <p> <strong>US {{parseCurrency total}}</strong>
                                                     </p>
                                                   </td>
                                                 </tr>
