@@ -118,4 +118,9 @@ export class UserController {
     const user = req.user as IPayloadToken;
     return this.userService.updateClass(course, module, idClass, user.sub ,body);
   }
+
+  @Get('analytics')
+  getClients() {
+    return this.userService.getAllStudents();
+  }
 }
