@@ -43,6 +43,16 @@ export class UserService {
   }
 
   /**
+   * Method responsible for obtaining users with the filter.
+   * @returns {Promise<IRequestResponse>} - Response method.
+   */
+  async getUserFilter(filter): Promise<IRequestResponse> {
+    return buildResponseSuccess({
+      data: await this.userModel.find(filter, { password: 0 }).sort({ createdAt: 1 }),
+    });
+  }
+
+  /**
    * Method responsible for creating a user.
    * @param {AddUserDto} user - Information user.
    * @returns {Promise<IRequestResponse>} - Response method.

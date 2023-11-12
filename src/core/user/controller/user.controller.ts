@@ -43,6 +43,19 @@ export class UserController {
   }
 
   /**
+   * Controller of the method getUserFilter.
+   */
+  @Post('all')
+  async getAllUsersFilter(@Body() filter, @Res() res: Response) {
+    try {
+      const RESPONSE = await this.userService.getUserFilter(filter);
+      return res.status(RESPONSE['code']).json(RESPONSE);
+    } catch (error) {
+      return res.status(400).json(error);
+    }
+  }
+
+  /**
    * Filter user by email.
    * @param data Email to search.
    * @returns The user.
