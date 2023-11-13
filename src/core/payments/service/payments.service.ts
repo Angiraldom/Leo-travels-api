@@ -36,7 +36,13 @@ export class PaymentsService {
 
   async findAll(): Promise<IRequestResponse> {
     return buildResponseSuccess({
-      data: await this.invoiceModel.find(),
+      data: await this.invoiceModel.find().sort({ fecha: -1 }),
+    });
+  }
+
+  async getTransactionByFilter(filter): Promise<IRequestResponse> {
+    return buildResponseSuccess({
+      data: await this.invoiceModel.find(filter).sort({ fecha: -1 }),
     });
   }
 
