@@ -58,6 +58,11 @@ export class PaymentsController {
     return this.paymentsService.findAll();
   }
 
+  @Post('getPayments')
+  findTransactionsByFilter(@Body() filter) {
+    return this.paymentsService.getTransactionByFilter(filter);
+  }
+
   @Public()
   @Post('saveProduct')
   saveProduct(@Body() body: { reference: string; product: {} }) {
