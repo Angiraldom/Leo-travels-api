@@ -274,4 +274,31 @@ export class UserService {
       data: 'Actualizado exitosamente',
     });
   }
+
+  async getAllStudents() {
+    const students = await this.userModel.find({ role: 'Cliente', courses: { $exists: true } }, { courses: 1, name: 1 }).lean();
+    const response = {
+      totalUsers: students.length,
+      usersStartedCourse: 0,
+      usersCompletedCourse: 0
+    };
+
+    response.usersStartedCourse = students.filter((user) => {
+      // Get photography course
+      return user.courses[0].modules.find((module) => {
+        return module.classes.some((itemClass) => itemClass.completed);
+      });
+    }).length;
+
+    response.usersCompletedCourse = students.filter((user) => {
+      // Get photography course
+      return user.courses[0].modules.every((module) => {
+        return module.classes.every((itemClass) => itemClass.completed);
+      });
+    }).length;
+
+    return buildResponseSuccess({
+      data: response,
+    });
+  }
 }
